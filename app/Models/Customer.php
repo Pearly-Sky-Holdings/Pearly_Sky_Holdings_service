@@ -34,4 +34,9 @@ class Customer extends Model
     {
         $this->attributes['password'] = bcrypt($value);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'customer_id', 'customer_id');
+    }
 }
