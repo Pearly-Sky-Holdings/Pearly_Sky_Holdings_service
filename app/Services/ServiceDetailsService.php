@@ -38,11 +38,10 @@ class ServiceDetailsService
             ]);
 
             if (!isset($validatedData['customer_id'])) {
-                Log::info('4');
                 $customer = Customer::create($validatedData['customer']);
                 $result = DB::table('customers')
                     ->Where('email', 'LIKE', '%' . $customer->email . '%')
-                    ->get();
+                    ->get()->first();
                 $customerId = $result->customer_id;
             } else {
                 Log::info('5');
