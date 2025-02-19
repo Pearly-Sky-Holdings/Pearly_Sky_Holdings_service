@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('packages', function (Blueprint $table) {
-            $table->id('package_id');
+        Schema::create('services', function (Blueprint $table) {
+            $table->id('service_id');
             $table->string('name');
             $table->string('price',)->default('0$')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('packeges');
+        Schema::dropIfExists('services');
     }
 };

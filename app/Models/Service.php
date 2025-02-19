@@ -5,14 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Packege extends Model
+class Service extends Model
 {
     use HasFactory, HasApiTokens;
 
-    protected $primaryKey = 'package_id';
-    protected $table = 'packages';
+    protected $primaryKey = 'service_id';
     public $incrementing = true;
 
     protected $fillable = [
@@ -21,8 +19,8 @@ class Packege extends Model
         'status'
     ];
 
-    public function packageDetails(): HasMany
+    public function serviceDetails()
     {
-        return $this->hasMany(packegeDetails::class);
+        return $this->hasMany(ServiceDetails::class);
     }
 }
