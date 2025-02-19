@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Packege extends Model
 {
@@ -19,4 +20,9 @@ class Packege extends Model
         'price',
         'status'
     ];
+
+    public function packageDetails(): HasMany
+    {
+        return $this->hasMany(packegeDetails::class);
+    }
 }

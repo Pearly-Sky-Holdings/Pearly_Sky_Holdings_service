@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('services', function (Blueprint $table) {
-            $table->increments('service_id');
+            $table->id('service_id');
             $table->string('name');
             $table->string('price',)->default('0$')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');

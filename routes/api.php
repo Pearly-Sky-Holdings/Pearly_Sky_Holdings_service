@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ServiceDetailsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthControllers;
@@ -33,6 +34,9 @@ Route::post('/saveOrder', [OrderController::class, 'save'])->name('save');
 Route::put('/updateOrder/{id}', [OrderController::class, 'update'])->name('update');
 Route::delete('/deleteOrder/{id}', [OrderController::class, 'delete'])->name('delete');
 Route::get('/getOrdersByCustomer/{customerId}', [OrderController::class, 'getByCustomerId'])->name('getByCustomerId');
+
+//serviceDetails api
+Route::post('/saveServiceDetails', [ServiceDetailsController::class, 'save'])->name('save');
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {

@@ -18,4 +18,9 @@ class Service extends Model
         'price',
         'status'
     ];
+
+    public function serviceDetails()
+    {
+        return $this->hasMany(ServiceDetails::class);
+    }
 }
