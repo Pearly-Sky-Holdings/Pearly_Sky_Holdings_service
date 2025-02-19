@@ -11,8 +11,7 @@ class CustomerService
     {
         $customer = new Customer();
         $customer->fill($request->all());
-        $customer->save();
-        return $customer;
+        return $customer->save();
     }
 
 

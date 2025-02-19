@@ -6,6 +6,8 @@ use App\Models\Customer;
 use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+
 
 class CustomerControllers extends Controller
 {
@@ -19,26 +21,33 @@ class CustomerControllers extends Controller
     }
 
 
-    public function index()
+    public function getAll()
     {
-      return Customer::with('contactperson')->get();
+      $customer = DB::table('customers')
+        ->get();
+      return response()->json($customer,200);
     }
 
 
-//     public function search(string $input): JsonResponse
-//   {
-//     $company = Customer::with('contactperson')
-//       ->where('cust_id', 'LIKE', '%' . $input . '%')
-//       ->orWhere('cust_name', 'LIKE', '%' . $input . '%')
-//       ->orWhere('cust_contact', 'LIKE', '%' . $input . '%')
-//       ->get();
-//     return response()->json($company, 201);
-//   }
+    public function search(string $input): JsonResponse
+  {
+    $company = DB::table('customers')
+      ->where('customer_id', 'LIKE', '%' . $input . '%')
+      ->orWhere('first_name', 'LIKE', '%' . $input . '%')
+      ->orWhere('last_name', 'LIKE', '%' . $input . '%')
+      ->orWhere('email', 'LIKE', '%' . $input . '%')
+      ->get();
+    return response()->json($company, 201);
+  }
 
 
   public function save(Request $request)
   {
-    return $this->customerService->save($request);
+      $this->customerService->save($request);
+      $request = DB::table('customers')
+      ->Where('email', 'LIKE', '%' . $request->email . '%')
+      ->get();
+      return response()->json($request, 201);
   }
 
 
