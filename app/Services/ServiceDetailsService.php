@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ServiceDetailsService
 {
@@ -44,9 +45,7 @@ class ServiceDetailsService
                     ->get()->first();
                 $customerId = $result->customer_id;
             } else {
-                Log::info('5');
                 $customer = Customer::find($validatedData['customer_id']);
-                Log::info($validatedData['customer']);
                 $customer->update($validatedData['customer']);
                 $customerId = $validatedData['customer_id'];
             }
@@ -58,7 +57,6 @@ class ServiceDetailsService
                 'status' => 'inactive'
             ]);
 
-            Log::info('7 '.$validatedData['service_id']);
             // Create service detail
             $serviceDetail = ServiceDetails::create([
                 'order_id' => $order->order_id,
@@ -79,7 +77,6 @@ class ServiceDetailsService
                 'status' => 'pending'
             ]);
 
-            Log::info('8');
             // Save package details
             foreach ($validatedData['package_details'] as $packageDetail) {
                 PackageDetail::create([
@@ -89,9 +86,10 @@ class ServiceDetailsService
                     'qty' => $packageDetail['qty'] ?? null,
                 ]);
             }
-            Log::info('9');
             // Commit transaction
             DB::commit();
+
+            $this->sendEmail($customer->email, $customerId);
 
             return response()->json([
                 'status' => 'success',
@@ -112,7 +110,50 @@ class ServiceDetailsService
                 'status' => 'error',
                 'message' => 'Failed to save service details',
                 'error' => $e->getMessage()
-            ], 500);
+            ], status: 500);
+        }
+    }
+
+
+    //send mail 
+    private function sendEmail($email, $customerId)
+    {
+        try {
+            $customer = Customer::find($customerId);
+            $latestOrder = Order::where('customer_id', $customerId)->latest()->first();
+            $serviceDetail = ServiceDetails::where('order_id', $latestOrder->order_id)->first();
+            $service = Service::find($serviceDetail->service_id);
+    
+            // Get package details
+            $packageDetails = PackageDetail::where('service_detail_id', $serviceDetail->id)
+                ->with('package')
+                ->get();
+                Log::info("Package details: " . json_encode($packageDetails));
+    
+            // Generate QR code and save as an image
+            // $qrCodePath = storage_path("app/public/qrcodes/customer_{$customerId}.png");
+            // QrCode::format('png')
+            //     ->size(200)
+            //     ->generate($customerId, $qrCodePath);
+    
+            // Prepare data for email template
+            $data = [
+                'customer' => $customer,
+                'order' => $latestOrder,
+                'serviceDetail' => $serviceDetail,
+                'service' => $service,
+                'packageDetails' => $packageDetails
+            ];
+    
+            // Send email with QR code as an attachment
+            \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data));
+    
+            Log::info("Email sent successfully to customer: {$email}");
+    
+            return true;
+        } catch (Exception $e) {
+            Log::error("Failed to send email to customer: {$email}. Error: " . $e->getMessage());
+            return false;
         }
     }
 }

@@ -22,7 +22,7 @@ class PackageDetail extends Model
 
     public function package(): BelongsTo
     {
-        return $this->belongsTo(Packege::class);
+        return $this->belongsTo(Packege::class, 'package_id');
     }
 
     public function serviceDetail(): BelongsTo
