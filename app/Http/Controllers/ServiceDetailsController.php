@@ -18,7 +18,6 @@ class ServiceDetailsController extends Controller
 
     public function save(Request $request)
     {
-        $isSaveData = $this->serviceDetailsService->save($request);
-        return response()->json($isSaveData, 201);
+        return $this->serviceDetailsService->save($request);
     }
 }
