@@ -23,6 +23,11 @@ class Packege extends Model
 
     public function packageDetails(): HasMany
     {
-        return $this->hasMany(packegeDetails::class);
+        return $this->hasMany(PackageDetail::class);
+    }
+
+    public function serviceWithPackage(): HasMany
+    {
+        return $this->hasMany(PackageDetail::class);
     }
 }

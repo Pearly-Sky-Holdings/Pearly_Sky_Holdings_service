@@ -122,6 +122,11 @@ class PackageSeeder extends Seeder
                 'name' => 'Oven Cleaning',
                 'price' => '85$',
                 'status' => 'active'
+            ],
+            [
+                'name' => 'Cleaning Windows Inside and Outside',
+                'price' => '8$',
+                'status' => 'active'
             ]
         ];
 

@@ -15,7 +15,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             CustomerSeeder::class,
             EmployeeSeeder::class,
-            PackageSeeder::class
+            PackageSeeder::class,
+            ServiceSeeder::class,
+            ServiceWithPackageSeeder::class,
         ]);
     }
 }
