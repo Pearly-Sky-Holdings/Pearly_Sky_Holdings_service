@@ -10,7 +10,11 @@ use App\Http\Controllers\CustomerControllers;
 use App\Http\Controllers\ServiceController;
 
 Route::post('/login', [AuthControllers::class, 'login'])->name('login');
+
+//packeges api
 Route::get('/getPackege', [PackegesControllers::class, 'getDevices'])->name('getDevices');
+Route::get('/service_with_packages/{id}/', [PackegesControllers::class, 'getPackagesByService'])->name('getPackagesByService');
+
 
 
 //customer api

@@ -23,4 +23,9 @@ class Service extends Model
     {
         return $this->hasMany(ServiceDetails::class);
     }
+
+    public function serviceWithPackege()
+    {
+        return $this->hasMany(ServiceDetails::class);
+    }
 }
