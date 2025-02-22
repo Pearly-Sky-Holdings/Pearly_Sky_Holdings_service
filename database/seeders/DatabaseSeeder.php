@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             PackageSeeder::class,
             ServiceSeeder::class,
             ServiceWithPackageSeeder::class,
+            ReStockingChecklistSeeder::class,
         ]);
     }
 }

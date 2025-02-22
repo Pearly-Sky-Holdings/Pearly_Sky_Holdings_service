@@ -120,7 +120,7 @@ class ServiceDetailsService
     }
 
 
-    //send mail 
+    //send mail
     private function sendEmail($email, $customerId)
     {
         try {

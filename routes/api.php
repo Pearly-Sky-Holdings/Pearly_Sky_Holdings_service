@@ -2,20 +2,21 @@
 
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ServiceDetailsController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthControllers;
 use App\Http\Controllers\PackegesControllers;
 use App\Http\Controllers\CustomerControllers;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ReStockingChecklistControllers;
+
 
 Route::post('/login', [AuthControllers::class, 'login'])->name('login');
 
-//packeges api
-Route::get('/getPackege', [PackegesControllers::class, 'getDevices'])->name('getDevices');
+//packages
 Route::get('/service_with_packages/{id}/', [PackegesControllers::class, 'getPackagesByService'])->name('getPackagesByService');
 
-
+//re_stocking_checklists
+Route::get('/re_stocking_checklists', [ReStockingChecklistControllers::class, 'getAll'])->name('getAll');
 
 //customer api
 Route::get('/getCustomers', [CustomerControllers::class, 'getAll'])->name('getAll');
@@ -44,6 +45,6 @@ Route::post('/saveServiceDetails', [ServiceDetailsController::class, 'save'])->n
 
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
-
-   
+    //packeges api
+    Route::get('/getPackege', [PackegesControllers::class, 'getDevices'])->name('getDevices');
 });
