@@ -35,10 +35,11 @@ class ServiceDetailsService
                 'business_property' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
-                'package_details' => 'required|array'
+                'package_details' => 'array'
             ]);
 
             if (!isset($validatedData['customer_id'])) {
+                
                 $customer = Customer::create($validatedData['customer']);
                 $result = DB::table('customers')
                     ->Where('email', 'LIKE', '%' . $customer->email . '%')
@@ -49,6 +50,7 @@ class ServiceDetailsService
                 $customer->update($validatedData['customer']);
                 $customerId = $validatedData['customer_id'];
             }
+
             $order = Order::create([
                 'customer_id' => $customerId,
                 'date' => now()->toDateString(),
@@ -77,15 +79,18 @@ class ServiceDetailsService
                 'status' => 'pending'
             ]);
 
-            // Save package details
-            foreach ($validatedData['package_details'] as $packageDetail) {
-                PackageDetail::create([
-                    'package_id' => $packageDetail['package_id'],
-                    'service_detail_id' => $serviceDetail->id,
-                    'price' => $packageDetail['price'] ?? null,
-                    'qty' => $packageDetail['qty'] ?? null,
-                ]);
+            if (isset($validatedData['package_details'])) {
+                // Save package details
+                foreach ($validatedData['package_details'] as $packageDetail) {
+                    PackageDetail::create([
+                        'package_id' => $packageDetail['package_id'],
+                        'service_detail_id' => $serviceDetail->id,
+                        'price' => $packageDetail['price'] ?? null,
+                        'qty' => $packageDetail['qty'] ?? null,
+                    ]);
+                }
             }
+
             // Commit transaction
             DB::commit();
 
@@ -123,19 +128,18 @@ class ServiceDetailsService
             $latestOrder = Order::where('customer_id', $customerId)->latest()->first();
             $serviceDetail = ServiceDetails::where('order_id', $latestOrder->order_id)->first();
             $service = Service::find($serviceDetail->service_id);
-    
+
             // Get package details
             $packageDetails = PackageDetail::where('service_detail_id', $serviceDetail->id)
                 ->with('package')
                 ->get();
-                Log::info("Package details: " . json_encode($packageDetails));
-    
+
             // Generate QR code and save as an image
             // $qrCodePath = storage_path("app/public/qrcodes/customer_{$customerId}.png");
             // QrCode::format('png')
             //     ->size(200)
             //     ->generate($customerId, $qrCodePath);
-    
+
             // Prepare data for email template
             $data = [
                 'customer' => $customer,
@@ -144,12 +148,12 @@ class ServiceDetailsService
                 'service' => $service,
                 'packageDetails' => $packageDetails
             ];
-    
+
             // Send email with QR code as an attachment
             \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data));
-    
+
             Log::info("Email sent successfully to customer: {$email}");
-    
+
             return true;
         } catch (Exception $e) {
             Log::error("Failed to send email to customer: {$email}. Error: " . $e->getMessage());
