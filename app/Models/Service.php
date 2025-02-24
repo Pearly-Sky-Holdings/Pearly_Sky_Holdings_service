@@ -27,5 +27,11 @@ class Service extends Model
     public function serviceWithPackege()
     {
         return $this->hasMany(ServiceDetails::class);
+    } 
+    
+    
+    public function serviceWithReStocking()
+    {
+        return $this->hasMany(ServiceDetails::class);
     }
 }

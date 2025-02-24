@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\PackageDetail;
+use App\Models\ReStockingChecklistDetails;
 use App\Models\Service;
 use App\Models\ServiceDetails;
 use Illuminate\Http\Request;
@@ -35,7 +36,8 @@ class ServiceDetailsService
                 'business_property' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
-                'package_details' => 'array'
+                'package_details' => 'array',
+                'reStock_details' => 'array'
             ]);
 
             if (!isset($validatedData['customer_id'])) {
@@ -87,6 +89,16 @@ class ServiceDetailsService
                         'service_detail_id' => $serviceDetail->id,
                         'price' => $packageDetail['price'] ?? null,
                         'qty' => $packageDetail['qty'] ?? null,
+                    ]);
+                }
+            }
+
+            if (isset($validatedData['reStock_details'])) {
+                // Save reStock details
+                foreach ($validatedData['reStock_details'] as $reStockDetail) {
+                    ReStockingChecklistDetails::create([
+                        're_stocking_checklist_id' => $reStockDetail['re_stocking_checklist_id'],
+                        'service_id' => $serviceDetail->id,
                     ]);
                 }
             }
