@@ -18,4 +18,9 @@ class ReStockingChecklist extends Model
         'price',
         'status'
     ];
+
+    public function serviceWithReStocking(): HasMany
+    {
+        return $this->hasMany(ReStockingChecklistDetails::class);
+    }
 }
