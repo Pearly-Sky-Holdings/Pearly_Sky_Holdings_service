@@ -21,7 +21,6 @@ class ServiceDetailsService
     public function save(Request $request)
     {
         try {
-            DB::beginTransaction();
             $validatedData = $request->validate([
                 'customer_id' => 'sometimes',
                 'customer' => 'required_without:customer_id|array',
@@ -38,18 +37,46 @@ class ServiceDetailsService
                 'business_property' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
-
                 'total_price' => 'nullable|string',
-
                 'personal_information' => 'array',
                 'reStock_details' => 'array',
                 'cleaning_item' => 'array',
                 'package_details' => 'array',
-
             ]);
 
-            if (!isset($validatedData['customer_id'])) {
+            // Execute transaction in a separate method
+            $result = $this->executeTransaction($validatedData);
 
+            // Send email after successful transaction
+            $this->sendEmail($result['customer']->email, $result['customerId']);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Service details saved successfully',
+                'data' => [
+                    'service_detail' => $result['serviceDetail'],
+                    'order' => $result['order'],
+                    'customer' => $result['customer']
+                ]
+            ], 201);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to save service details',
+                'error' => $e->getMessage()
+            ], status: 500);
+        }
+    }
+
+   
+    private function executeTransaction(array $validatedData)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Handle customer creation or update
+            if (!isset($validatedData['customer_id'])) {
                 $customer = Customer::create($validatedData['customer']);
                 $result = DB::table('customers')
                     ->Where('email', 'LIKE', '%' . $customer->email . '%')
@@ -61,6 +88,7 @@ class ServiceDetailsService
                 $customerId = $validatedData['customer_id'];
             }
 
+            // Create order
             $order = Order::create([
                 'customer_id' => $customerId,
                 'date' => now()->toDateString(),
@@ -68,7 +96,6 @@ class ServiceDetailsService
                 'price' => ($validatedData['total_price']),
                 'status' => 'inactive'
             ]);
-
 
             // Create service detail
             $serviceDetail = ServiceDetails::create([
@@ -90,18 +117,15 @@ class ServiceDetailsService
                 'status' => 'pending'
             ]);
 
-
+            // Save personal information if provided
             if (isset($validatedData['personal_information'])) {
-                // Save personal information
-                $personalInformation = new PersonalInformations();
                 $personalInformation = $validatedData['personal_information'];
                 $personalInformation['service_detail_id'] = $serviceDetail->id;
                 PersonalInformations::create($personalInformation);
             }
-            
 
+            // Save package details if provided
             if (isset($validatedData['package_details'])) {
-                // Save package details
                 foreach ($validatedData['package_details'] as $packageDetail) {
                     PackageDetail::create([
                         'package_id' => $packageDetail['package_id'],
@@ -112,8 +136,8 @@ class ServiceDetailsService
                 }
             }
 
+            // Save reStock details if provided
             if (isset($validatedData['reStock_details'])) {
-                // Save reStock details
                 foreach ($validatedData['reStock_details'] as $reStockDetail) {
                     ReStockingChecklistDetails::create([
                         're_stocking_checklist_id' => $reStockDetail['re_stocking_checklist_id'],
@@ -122,8 +146,8 @@ class ServiceDetailsService
                 }
             }
 
+            // Save item details if provided
             if (isset($validatedData['cleaning_item'])) {
-                // Save item details
                 foreach ($validatedData['cleaning_item'] as $item) {
                     ItemDetails::create([
                         'item_id' => $item['id'],
@@ -134,36 +158,24 @@ class ServiceDetailsService
                 }
             }
 
-            // Commit transaction
+           
             DB::commit();
 
-            $this->sendEmail($customer->email, $customerId);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Service details saved successfully',
-                'data' => [
-                    'service_detail' => $serviceDetail,
-                    'order' => $order,
-                    'customer' => $customer
-                ]
-            ], 201);
-
+            return [
+                'customer' => $customer,
+                'customerId' => $customerId,
+                'order' => $order,
+                'serviceDetail' => $serviceDetail
+            ];
 
         } catch (Exception $e) {
             // Rollback transaction on error
             DB::rollBack();
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to save service details',
-                'error' => $e->getMessage()
-            ], status: 500);
+            throw $e; 
         }
     }
 
 
-    //send mail
     private function sendEmail($email, $customerId)
     {
         try {
@@ -177,13 +189,6 @@ class ServiceDetailsService
                 ->with('package')
                 ->get();
 
-            // Generate QR code and save as an image
-            // $qrCodePath = storage_path("app/public/qrcodes/customer_{$customerId}.png");
-            // QrCode::format('png')
-            //     ->size(200)
-            //     ->generate($customerId, $qrCodePath);
-
-            // Prepare data for email template
             $data = [
                 'customer' => $customer,
                 'order' => $latestOrder,
