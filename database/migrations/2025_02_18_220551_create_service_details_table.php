@@ -22,12 +22,13 @@ return new class extends Migration
             $table->string('property_size')->nullable();
             $table->integer('duration')->nullable();  // Duration in minutes
             $table->integer('number_of_cleaners')->default(1);
-            $table->text('note')->nullable();
-            $table->string('person_type')->nullable();
-            $table->string('language')->default('en');
             $table->string('business_property')->nullable();
+            $table->string('frequency')->nullable();
+            $table->string('request_gender')->nullable();
+            $table->string('request_language')->default('en');
             $table->string('cleaning_solvents')->nullable();
             $table->string('Equipment')->nullable();
+            $table->text('note')->nullable();
             $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
