@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('re_stocking_checklist_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('re_stocking_checklist_id')->constrained('re_stocking_checklists', 'id')->onDelete('cascade');
-            $table->foreignId('service_id')->constrained('services', 'service_id')->onDelete('cascade');
-            $table->timestamps();
+            $table->foreignId('service_detail_id')->constrained('service_details', 'id')->onDelete('cascade');            $table->timestamps();
         });
     }
 

@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\ItemDetails;
 use App\Models\Order;
 use App\Models\PackageDetail;
+use App\Models\PersonalInformations;
 use App\Models\ReStockingChecklistDetails;
 use App\Models\Service;
 use App\Models\ServiceDetails;
@@ -31,17 +33,23 @@ class ServiceDetailsService
                 'duration' => 'nullable|integer',
                 'number_of_cleaners' => 'nullable|integer',
                 'note' => 'nullable|string',
-                'person_type' => 'nullable|string',
-                'language' => 'nullable|string',
+                'request_gender' => 'nullable|string',
+                'request_language' => 'nullable|string',
                 'business_property' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
+
+                'total_price' => 'nullable|string',
+
+                'personal_information' => 'array',
+                'reStock_details' => 'array',
+                'cleaning_item' => 'array',
                 'package_details' => 'array',
-                'reStock_details' => 'array'
+
             ]);
 
             if (!isset($validatedData['customer_id'])) {
-                
+
                 $customer = Customer::create($validatedData['customer']);
                 $result = DB::table('customers')
                     ->Where('email', 'LIKE', '%' . $customer->email . '%')
@@ -57,9 +65,10 @@ class ServiceDetailsService
                 'customer_id' => $customerId,
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'price' => "0$",
+                'price' => ($validatedData['total_price']),
                 'status' => 'inactive'
             ]);
+
 
             // Create service detail
             $serviceDetail = ServiceDetails::create([
@@ -73,13 +82,23 @@ class ServiceDetailsService
                 'duration' => $validatedData['duration'] ?? null,
                 'number_of_cleaners' => $validatedData['number_of_cleaners'] ?? 1,
                 'note' => $validatedData['note'] ?? null,
-                'person_type' => $validatedData['person_type'] ?? null,
-                'language' => $validatedData['language'] ?? 'en',
+                'request_gender' => $validatedData['person_type'] ?? null,
+                'request_language' => $validatedData['language'] ?? 'en',
                 'business_property' => $validatedData['business_property'] ?? null,
                 'cleaning_solvents' => $validatedData['cleaning_solvents'] ?? null,
                 'Equipment' => $validatedData['Equipment'] ?? null,
                 'status' => 'pending'
             ]);
+
+
+            if (isset($validatedData['personal_information'])) {
+                // Save personal information
+                $personalInformation = new PersonalInformations();
+                $personalInformation = $validatedData['personal_information'];
+                $personalInformation['service_detail_id'] = $serviceDetail->id;
+                PersonalInformations::create($personalInformation);
+            }
+            
 
             if (isset($validatedData['package_details'])) {
                 // Save package details
@@ -98,7 +117,19 @@ class ServiceDetailsService
                 foreach ($validatedData['reStock_details'] as $reStockDetail) {
                     ReStockingChecklistDetails::create([
                         're_stocking_checklist_id' => $reStockDetail['re_stocking_checklist_id'],
-                        'service_id' => $serviceDetail->id,
+                        'service_detail_id' => $serviceDetail->id,
+                    ]);
+                }
+            }
+
+            if (isset($validatedData['cleaning_item'])) {
+                // Save item details
+                foreach ($validatedData['cleaning_item'] as $item) {
+                    ItemDetails::create([
+                        'item_id' => $item['id'],
+                        'service_detail_id' => $serviceDetail->id,
+                        'qty' => $item['qty'],
+                        'price' => $item['price']
                     ]);
                 }
             }

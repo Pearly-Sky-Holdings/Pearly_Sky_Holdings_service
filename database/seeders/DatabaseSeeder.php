@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
             EmployeeSeeder::class,
             PackageSeeder::class,
             ServiceSeeder::class,
-            ServiceWithPackageSeeder::class,
             ReStockingChecklistSeeder::class,
+            ItemSeeder::class,
         ]);
     }
 }
