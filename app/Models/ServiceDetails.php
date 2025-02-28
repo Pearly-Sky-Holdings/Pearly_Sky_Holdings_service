@@ -52,4 +52,19 @@ class ServiceDetails extends Model
     {
         return $this->hasMany(PackageDetail::class);
     }
+
+    public function ItemDetails(): HasMany
+    {
+        return $this->hasMany(ItemDetails::class);
+    }
+
+    public function serviceWithReStocking()
+    {
+        return $this->hasMany(ReStockingChecklistDetails::class);
+    }
+
+    public function serviceDetails()
+    {
+        return $this->hasMany(ServiceDetails::class);
+    }
 }
