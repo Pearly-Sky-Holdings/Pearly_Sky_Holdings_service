@@ -65,7 +65,7 @@ class ServiceDetailsService
                 'customer_id' => $customerId,
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'price' => ($validatedData['price']),
+                'price' => ($validatedData['total_price']),
                 'status' => 'inactive'
             ]);
 
