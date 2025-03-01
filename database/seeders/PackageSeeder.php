@@ -125,7 +125,7 @@ class PackageSeeder extends Seeder
             ],
             [
                 'name' => 'Cleaning Windows Inside and Outside',
-                'price' => '8$',
+                'price' => '0',
                 'status' => 'active'
             ]
         ];

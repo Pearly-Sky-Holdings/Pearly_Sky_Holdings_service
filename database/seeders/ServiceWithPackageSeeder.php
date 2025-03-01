@@ -63,7 +63,7 @@ class ServiceWithPackageSeeder extends Seeder
             ["package_id" => "22", "service_id" => "2"],
 
             ["package_id" => "1", "service_id" => "3"],
-            ["package_id" => "23", "service_id" => "4"],
+            ["package_id" => "23", "service_id" => "3"],
             ["package_id" => "3", "service_id" => "3"],
             ["package_id" => "4", "service_id" => "3"],
             ["package_id" => "5", "service_id" => "3"],
