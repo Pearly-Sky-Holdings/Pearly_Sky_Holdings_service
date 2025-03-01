@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Exception;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ServiceDetailsService
 {
