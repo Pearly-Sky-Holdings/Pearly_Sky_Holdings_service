@@ -37,7 +37,6 @@ class ServiceDetailsService
                 'business_property' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
-                'total_price' => 'nullable|string',
                 'personal_information' => 'array',
                 'reStock_details' => 'array',
                 'cleaning_item' => 'array',
@@ -93,7 +92,7 @@ class ServiceDetailsService
                 'customer_id' => $customerId,
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
-                'price' => ($validatedData['total_price']),
+                'price' => ($validatedData['price']),
                 'status' => 'inactive'
             ]);
 
