@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained('orders', 'order_id')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
             $table->foreignId('service_id')->constrained('services', 'service_id')->onDelete('cascade');
-            $table->decimal('price', 10, 2);
+            $table->string('price', );
             $table->date('date');
             $table->time('time');
             $table->string('property_size')->nullable();
