@@ -25,7 +25,7 @@ class ServiceDetailsService
                 'customer_id' => 'sometimes',
                 'customer' => 'required_without:customer_id|array',
                 'service_id' => 'required',
-                'price' => 'required|numeric',
+                'price' => 'required|string',
                 'date' => 'required|date',
                 'time' => 'required',
                 'property_size' => 'nullable|string',
