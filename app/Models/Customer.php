@@ -20,6 +20,8 @@ class Customer extends Model
         'country',
         'city',
         'province',
+        'street_address',
+        'apartment_type',
         'postal_code',
         'contact',
         'email',
