@@ -26,8 +26,10 @@ class ServiceDetails extends Model
         'number_of_cleaners',
         'note',
         'person_type',
-        'language',
+        'request_language',
         'business_property',
+        'frequency',
+        'request_gender',
         'cleaning_solvents',
         'Equipment',
         'status'

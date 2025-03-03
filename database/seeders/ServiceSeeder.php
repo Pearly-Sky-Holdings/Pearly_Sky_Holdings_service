@@ -16,12 +16,12 @@ class ServiceSeeder extends Seeder
         $services = [
             [
                 "name" => "Regular Basic Cleaning",
-                "price" => "27$",
+                "price" => "25.16$",
                 "status" => "active"
             ],
             [
                 "name" => "One Time Cleaning",
-                "price" => "27$",
+                "price" => "29.35$",
                 "status" => "active"
             ],
             [
