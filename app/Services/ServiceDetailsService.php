@@ -109,7 +109,7 @@ class ServiceDetailsService
                 'duration' => $validatedData['duration'] ?? null,
                 'number_of_cleaners' => $validatedData['number_of_cleaners'] ?? 1,
                 'note' => $validatedData['note'] ?? null,
-                'request_gender' => $validatedData['person_type'] ?? null,
+                'request_gender' => $validatedData['request_gender'] ?? null,
                 'frequency' => $validatedData['frequency'] ?? null,
                 'request_language' => $validatedData['request_language'] ?? 'en',
                 'business_property' => $validatedData['business_property'] ?? null,
