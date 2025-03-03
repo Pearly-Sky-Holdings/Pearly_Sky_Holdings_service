@@ -1,76 +1,157 @@
+<!-- resources/views/emails/service-order-confirmation.blade.php -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Service Order Confirmation</title>
+    <meta charset="utf-8">
+    <title>Service Order Confirmation!</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #f4f4f4; padding: 10px; text-align: center; }
-        .content { padding: 20px 0; }
-        .footer { font-size: 12px; color: #888; text-align: center; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+        }
+        .header {
+            background-color: #0055a4;
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .greeting {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #0055a4;
+            font-size: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table tr td {
+            padding: 8px 5px;
+            vertical-align: top;
+        }
+        table tr td:first-child {
+            font-weight: bold;
+            width: 40%;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #0055a4;
+            font-weight: bold;
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 12px;
+        }
+        .price-section {
+            margin-top: 25px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Service Order Confirmation</h1>
+            <h1>Service Order Confirmation!</h1>
         </div>
         
         <div class="content">
-            <h2>Dear {{ $data['customer']->first_name ?? '' }} {{ $data['customer']->last_name ?? '' }},</h2>
+            <div class="greeting">
+                <p>Dear {{ $data['customer']->name }},</p>
+                <p>Thank you for choosing our services. Your order has been received and is being processed.</p>
+            </div>
             
-            <p>Thank you for choosing our services. Your order has been received and is being processed.</p>
-            
-            <h3>Service Details:</h3>
-            <ul>
-                @if(isset($data['service']) && $data['service'])
-                <li><strong>Service:</strong> {{ $data['service']->name ?? 'N/A' }}</li>
-                @endif
-                @if(isset($data['serviceDetail']) && $data['serviceDetail'])
-                <li><strong>Date:</strong> {{ $data['serviceDetail']->date ?? 'N/A' }}</li>
-                <li><strong>Time:</strong> {{ $data['serviceDetail']->time ?? 'N/A' }}</li>
-                <li><strong>Price:</strong> ${{ $data['serviceDetail']->price ?? '0.00' }}</li>
-                @if(isset($data['serviceDetail']->number_of_cleaners))
-                <li><strong>Number of Cleaners:</strong> {{ $data['serviceDetail']->number_of_cleaners }}</li>
-                @endif
-                @if(isset($data['serviceDetail']->property_size))
-                <li><strong>Property Size:</strong> {{ $data['serviceDetail']->property_size }}</li>
-                @endif
-                @endif
-            </ul>
-            
-            @if(isset($data['packageDetails']) && count($data['packageDetails']) > 0)
-            <h3>Package Details:</h3>
+            <div class="section-title">Service Details</div>
             <table>
-                <thead>
-                    <tr>
-                        <th>Package</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data['packageDetails'] as $detail)
-                    <tr>
-                        <td>{{ $detail->package->name ?? 'N/A' }}</td>
-                        <td>{{ $detail->qty ?? '0' }}</td>
-                        <td>${{ $detail->price ?? '0.00' }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
+                <tr>
+                    <td>Service</td>
+                    <td>{{ $data['service']->name }}</td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td>{{ date('Y-m-d', strtotime($data['serviceDetail']->date)) }}</td>
+                </tr>
+                <tr>
+                    <td>Time</td>
+                    <td>{{ date('H:i:s', strtotime($data['serviceDetail']->time)) }}</td>
+                </tr>
+                <tr>
+                    <td>Property Size</td>
+                    <td>{{ $data['serviceDetail']->property_size ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td>Time Duration</td>
+                    <td>{{ $data['serviceDetail']->duration ?? '-' }} hours</td>
+                </tr>
+                <tr>
+                    <td>Number of Cleaners</td>
+                    <td>{{ $data['serviceDetail']->number_of_cleaners ?? '1' }}</td>
+                </tr>
+                <tr>
+                    <td>Frequency</td>
+                    <td>{{ $data['serviceDetail']->frequency ?? 'Weekly' }}</td>
+                </tr>
+                <tr>
+                    <td>Cleaning Solvents</td>
+                    <td>{{ $data['serviceDetail']->cleaning_solvents ?? 'Provided By The Company' }}</td>
+                </tr>
+                <tr>
+                    <td>Cleaning Equipments</td>
+                    <td>{{ $data['serviceDetail']->Equipment ?? 'Provided By The Company' }}</td>
+                </tr>
+                <tr>
+                    <td>Requirements</td>
+                    <td>{{ $data['serviceDetail']->note ?? 'N/A' }}</td>
+                </tr>
             </table>
-            @endif
             
-            <p>If you have any questions or need to make changes to your order, please contact our customer service at support@example.com or call us at (123) 456-7890.</p>
+            <div class="section-title">Package Details</div>
+            <table>
+                <tr>
+                    <td>Package</td>
+                    <td>Quantity</td>
+                    <td>Price</td>
+                </tr>
+                @foreach($data['packageDetails'] as $package)
+                <tr>
+                    <td>{{ $package->package->name ?? 'N/A' }}</td>
+                    <td>{{ $package->qty ?? '0' }}</td>
+                    <td>${{ $package->price ?? '0' }}</td>
+                </tr>
+                @endforeach
+            </table>
             
-            <p>Thank you for your business!</p>
-        </div>
-        
-        <div class="footer">
-            <p>© {{ date('Y') }} Your Company Name. All rights reserved.</p>
-            <p>This email was sent to {{ $data['customer']->email ?? '' }}</p>
+            <div class="price-section">
+                <p>Price: ${{ $data['order']->price }}</p>
+            </div>
+            
+            <div class="note">
+                <p>If you have any questions or need to make changes to your order, please contact our customer service at <a href="mailto:support@pearlyskyplc.com">support@pearlyskyplc.com</a> or call us at (123) 456-7890</p>
+            </div>
+            
+            <div class="footer">
+                <p>Thank you for your service order!</p>
+            </div>
         </div>
     </div>
 </body>

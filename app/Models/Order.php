@@ -16,7 +16,7 @@ class Order extends Model
         'customer_id',
         'date',
         'time',
-        'total',
+        'price',
         'status'
     ];
 
