@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('cleaning_solvents')->nullable();
             $table->string('Equipment')->nullable();
             $table->text('note')->nullable();
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'in_progress', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }

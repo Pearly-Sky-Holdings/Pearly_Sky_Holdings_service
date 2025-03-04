@@ -64,7 +64,7 @@ class ServiceDetailsService
                 'reStock_details' => 'array',
                 'cleaning_item' => 'array',
                 'package_details' => 'array',
-                'payment_method' => 'required|in:paypal,stripe',
+                'payment_method' => 'required|string',
             ]);
             
             // Save initial data but DO NOT COMMIT yet
@@ -73,10 +73,6 @@ class ServiceDetailsService
             // Now initiate payment based on selected method
             if ($validatedData['payment_method'] == 'paypal') {
                 $paymentResponse = $this->initiatePayPalPayment($result);
-                
-                // Instead of committing here, we'll return the payment URL to redirect the user
-                // The transaction will remain open until payment confirmation
-                // We'll store details in a session or similar mechanism
                 
                 // Store order ID in user session or cache for later retrieval
                 session(['pending_order_id' => $result['order']->order_id]);
@@ -87,7 +83,7 @@ class ServiceDetailsService
                     'payment_url' => $paymentResponse['approval_url'],
                     'order_id' => $result['order']->order_id
                 ]);
-            } else { // Stripe
+            } else if ($validatedData['payment_method'] == 'stripe') { // Stripe
                 $paymentResponse = $this->initiateStripePayment($result);
                 
                 // Store order ID in user session or cache for later retrieval
@@ -100,11 +96,10 @@ class ServiceDetailsService
                     'session_id' => $paymentResponse['session_id'],
                     'order_id' => $result['order']->order_id
                 ]);
+            } else {
+                // Direct completion for other payment methods
+                return $this->completeDirectPayment($result, $validatedData['payment_method']);
             }
-            
-            // Note: We DO NOT commit the transaction here.
-            // The transaction will be committed in handlePaymentSuccess
-            // or rolled back in handlePaymentCancel
             
         } catch (Exception $e) {
             // Roll back the transaction if any exception occurs
@@ -115,6 +110,49 @@ class ServiceDetailsService
                 'message' => 'Failed to save service details',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+    
+    /**
+     * Complete order directly for non-PayPal/Stripe payment methods
+     * 
+     * @param array $result Result from createPendingTransaction
+     * @param string $paymentMethod The payment method used
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function completeDirectPayment($result, $paymentMethod)
+    {
+        try {
+            // Update payment record to completed
+            $result['payment']->update([
+                'status' => 'completed',
+                'payment_method' => $paymentMethod,
+                'transaction_id' => 'DIRECT-' . time() . '-' . $result['order']->order_id,
+                'payment_data' => json_encode(['method' => $paymentMethod, 'date' => now()])
+            ]);
+            
+            // Update order status
+            $result['order']->update(['status' => 'active']);
+            
+            // Update service detail status
+            $result['serviceDetail']->update(['status' => 'confirmed']);
+            
+            // Now we can commit the transaction
+            DB::commit();
+            
+            // Send confirmation email
+            $this->sendEmail($result['customer']->email, $result['customerId']);
+            
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order completed successfully with ' . $paymentMethod,
+                'order_id' => $result['order']->order_id
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Direct payment completion failed: ' . $e->getMessage());
+            
+            throw new Exception('Failed to complete direct payment: ' . $e->getMessage());
         }
     }
     
@@ -379,7 +417,7 @@ class ServiceDetailsService
                         'message' => 'PayPal payment was not completed'
                     ], 400);
                 }
-            } else { // Stripe
+            } else if ($method === 'stripe'){ // Stripe
                 $sessionId = $request->input('session_id');
                 $session = StripeSession::retrieve($sessionId);
                 
@@ -419,6 +457,33 @@ class ServiceDetailsService
                         'message' => 'Stripe payment was not completed'
                     ], 400);
                 }
+            } else {
+                // Direct payment completion
+                // Update payment record
+                $payment->update([
+                    'status' => 'completed',
+                    'transaction_id' => 'DIRECT-' . time() . '-' . $orderId,
+                    'payment_data' => json_encode(['method' => $method, 'date' => now()])
+                ]);
+                
+                // Update order status
+                $order->update(['status' => 'active']);
+                
+                // Update service detail status
+                $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
+                $serviceDetail->update(['status' => 'confirmed']);
+                
+                // Now we can commit the transaction
+                DB::commit();
+                
+                // Send confirmation email
+                $customer = Customer::find($order->customer_id);
+                $this->sendEmail($customer->email, $order->customer_id);
+                
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Order completed successfully with ' . $method
+                ]);
             }
             
         } catch (Exception $e) {
