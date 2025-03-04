@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('service_details', function (Blueprint $table) {
             $table->id('id');
-            $table->foreignId('order_id')->constrained('orders', 'order_id')->onDelete('cascade');
+            $table->foreignId(column: 'order_id')->constrained('orders', 'order_id')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
             $table->foreignId('service_id')->constrained('services', 'service_id')->onDelete('cascade');
             $table->string('price', );
@@ -29,7 +29,7 @@ return new class extends Migration
             $table->string('cleaning_solvents')->nullable();
             $table->string('Equipment')->nullable();
             $table->text('note')->nullable();
-            $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');
+            $table->enum('status', ['pending', 'in_progress', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
     }
