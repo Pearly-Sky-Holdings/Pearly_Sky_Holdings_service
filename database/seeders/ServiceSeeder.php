@@ -16,47 +16,47 @@ class ServiceSeeder extends Seeder
         $services = [
             [
                 "name" => "Regular Basic Cleaning",
-                "price" => "25.16$",
+                "price" => "25.00€",
                 "status" => "active"
             ],
             [
                 "name" => "One Time Cleaning",
-                "price" => "29.35$",
+                "price" => "27.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Last Minute Cleaning",
-                "price" => "57$",
+                "price" => "40.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Deep Cleaning",
-                "price" => "59$",
+                "price" => "32.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Move In/Out Cleaning",
-                "price" => "59$",
+                "price" => "30.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Post Construction & Renovation Cleaning",
-                "price" => "59$",
+                "price" => "29.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Airbnb And Short Term Rental Cleaning",
-                "price" => "59$",
+                "price" => "29.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Child Care Services",
-                "price" => "59$",
+                "price" => "29.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Elder’s Care Service",
-                "price" => "59$",
+                "price" => "29.00€",
                 "status" => "active"
             ],
             [
