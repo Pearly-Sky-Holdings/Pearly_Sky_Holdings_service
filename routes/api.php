@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ServiceDetailsController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,10 @@ Route::post('/saveService', [ServiceController::class, 'save'])->name('save');
 Route::get('/searchService/{id}', [ServiceController::class, 'search'])->name('search');
 Route::put('/updateService/{id}', [ServiceController::class, 'update'])->name('update');
 Route::delete('/deleteService/{id}', [ServiceController::class, 'destroy'])->name('destroy');
+
+//feedback api
+Route::get('/getFeedback', [FeedbackController::class, 'getAll'])->name('getAll');
+Route::post('/saveFeedback', [FeedbackController::class, 'save'])->name('save');
 
 //order api
 Route::get('/getOrders', [OrderController::class, 'getAll'])->name('getAll');
