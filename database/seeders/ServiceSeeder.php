@@ -31,12 +31,12 @@ class ServiceSeeder extends Seeder
             ],
             [
                 "name" => "Deep Cleaning",
-                "price" => "32.00€",
+                "price" => "30.00€",
                 "status" => "active"
             ],
             [
                 "name" => "Move In/Out Cleaning",
-                "price" => "30.00€",
+                "price" => "32.00€",
                 "status" => "active"
             ],
             [
