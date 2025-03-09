@@ -33,7 +33,7 @@ class CustomerControllers extends Controller
   public function search(string $input): JsonResponse
   {
     $customers = DB::table('customers')
-      ->where('customer_id', 'LIKE', '%' . $input . '%')
+      ->where('customer_id', $input)
       ->get();
 
     $result = [];
