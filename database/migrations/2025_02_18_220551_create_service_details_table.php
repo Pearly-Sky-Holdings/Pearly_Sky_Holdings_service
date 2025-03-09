@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('request_language')->default('en');
             $table->string('cleaning_solvents')->nullable();
             $table->string('Equipment')->nullable();
+            $table->string('free_estimate')->nullable();
+            $table->string('time_zoon')->nullable();
             $table->text('note')->nullable();
             $table->enum('status', ['pending', 'in_progress', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
