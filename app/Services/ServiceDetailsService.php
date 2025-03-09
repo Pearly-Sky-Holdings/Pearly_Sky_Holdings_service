@@ -325,6 +325,9 @@ class ServiceDetailsService
             $request = new OrdersCreateRequest();
             $request->prefer('return=representation');
 
+            // Clean the price value to ensure it's a valid number format without currency symbols
+            $price = preg_replace('/[^0-9.]/', '', $result['order']->price);
+
             // Log request data (excluding sensitive information)
             Log::info('Creating PayPal order for Order ID: ' . $result['order']->order_id . ' with amount: ' . $result['order']->price);
 
@@ -335,7 +338,7 @@ class ServiceDetailsService
                         'reference_id' => $result['order']->order_id,
                         'description' => 'Service Order',
                         'amount' => [
-                            'value' => $result['order']->price,
+                            'value' => $price,
                             'currency_code' => 'USD'
                         ]
                     ]
