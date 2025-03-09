@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId(column: 'order_id')->constrained('orders', 'order_id')->onDelete('cascade');
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
             $table->foreignId('service_id')->constrained('services', 'service_id')->onDelete('cascade');
-            $table->string('price', );
+            $table->string('price');
             $table->date('date');
             $table->time('time');
             $table->string('property_size')->nullable();
-            $table->integer('duration')->nullable();  // Duration in minutes
+            $table->string('duration')->nullable();  // Duration in minutes
             $table->integer('number_of_cleaners')->default(1);
             $table->string('business_property')->nullable();
             $table->string('frequency')->nullable();
