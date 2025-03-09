@@ -5,6 +5,7 @@ use App\Models\ItemDetails;
 use App\Models\Order;
 use App\Models\PackageDetail;
 use App\Models\PersonalInformations;
+use App\Models\ReStockingChecklist;
 use App\Models\ReStockingChecklistDetails;
 use App\Models\Service;
 use App\Models\ServiceDetails;
@@ -23,45 +24,45 @@ use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
 class ServiceDetailsService
 {
     private $paypalClient;
-    
+
     public function __construct()
     {
         try {
             // Initialize PayPal client with proper error handling
             $clientId = config('services.paypal.client_id');
             $clientSecret = config('services.paypal.secret');
-            
+
             // Log the initialization attempt (but not the credentials)
             Log::info('Initializing PayPal client');
-            
+
             // Check if credentials exist
             if (empty($clientId) || empty($clientSecret)) {
                 Log::error('PayPal credentials are missing or empty');
                 throw new Exception('PayPal credentials are not properly configured');
             }
-            
+
             $paypalEnv = new SandboxEnvironment($clientId, $clientSecret);
             $this->paypalClient = new PayPalHttpClient($paypalEnv);
-            
+
             // Initialize Stripe with proper error handling
             $stripeKey = config('services.stripe.secret');
             if (empty($stripeKey)) {
                 Log::error('Stripe key is missing or empty');
                 throw new Exception('Stripe is not properly configured');
             }
-            
+
             Stripe::setApiKey($stripeKey);
         } catch (Exception $e) {
             Log::error('Payment gateway initialization failed: ' . $e->getMessage());
             // Don't throw here, let the service function handle errors when methods are called
         }
     }
-    
+
     public function save(Request $request)
     {
         // Start transaction at the outermost level
         DB::beginTransaction();
-        
+
         try {
             $validatedData = $request->validate([
                 'customer_id' => 'sometimes',
@@ -80,28 +81,30 @@ class ServiceDetailsService
                 'frequency' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
+                'free_estimate' => 'nullable|string',
+                'time_zoon' => 'nullable|string',
                 'personal_information' => 'array',
                 'reStock_details' => 'array',
                 'cleaning_item' => 'array',
                 'package_details' => 'array',
                 'payment_method' => 'required|string',
             ]);
-            
+
             // Save initial data but DO NOT COMMIT yet
             $result = $this->createPendingTransaction($validatedData);
-            
+
             // Now initiate payment based on selected method
             if ($validatedData['payment_method'] == 'paypal') {
                 // Check if PayPal client is properly initialized
                 if (!$this->paypalClient) {
                     throw new Exception('PayPal client is not properly initialized. Check your credentials.');
                 }
-                
+
                 $paymentResponse = $this->initiatePayPalPayment($result);
-                
+
                 // Store order ID in user session or cache for later retrieval
                 session(['pending_order_id' => $result['order']->order_id]);
-                
+
                 return response()->json([
                     'status' => 'pending_payment',
                     'message' => 'Please complete payment with PayPal',
@@ -110,10 +113,10 @@ class ServiceDetailsService
                 ]);
             } else if ($validatedData['payment_method'] == 'stripe') { // Stripe
                 $paymentResponse = $this->initiateStripePayment($result);
-                
+
                 // Store order ID in user session or cache for later retrieval
                 session(['pending_order_id' => $result['order']->order_id]);
-                
+
                 return response()->json([
                     'status' => 'pending_payment',
                     'message' => 'Please complete payment with Stripe',
@@ -125,13 +128,13 @@ class ServiceDetailsService
                 // Direct completion for other payment methods
                 return $this->completeDirectPayment($result, $validatedData['payment_method']);
             }
-            
+
         } catch (Exception $e) {
             // Roll back the transaction if any exception occurs
             DB::rollBack();
-            
+
             Log::error('Service details save failed: ' . $e->getMessage());
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to save service details',
@@ -139,7 +142,7 @@ class ServiceDetailsService
             ], 500);
         }
     }
-    
+
     /**
      * Complete order directly for non-PayPal/Stripe payment methods
      * 
@@ -157,19 +160,19 @@ class ServiceDetailsService
                 'transaction_id' => 'DIRECT-' . time() . '-' . $result['order']->order_id,
                 'payment_data' => json_encode(['method' => $paymentMethod, 'date' => now()])
             ]);
-            
+
             // Update order status
             $result['order']->update(['status' => 'active']);
-            
+
             // Update service detail status
             $result['serviceDetail']->update(['status' => 'confirmed']);
-            
+
             // Now we can commit the transaction
             DB::commit();
-            
+
             // Send confirmation email
             $this->sendEmail($result['customer']->email, $result['customerId']);
-            
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Order completed successfully with ' . $paymentMethod,
@@ -178,11 +181,11 @@ class ServiceDetailsService
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Direct payment completion failed: ' . $e->getMessage());
-            
+
             throw new Exception('Failed to complete direct payment: ' . $e->getMessage());
         }
     }
-    
+
     private function createPendingTransaction(array $validatedData)
     {
         // No need to begin transaction here, it's started in the save method
@@ -199,7 +202,7 @@ class ServiceDetailsService
                 $customer->update($validatedData['customer']);
                 $customerId = $validatedData['customer_id'];
             }
-            
+
             // Create order
             $order = Order::create([
                 'customer_id' => $customerId,
@@ -208,7 +211,7 @@ class ServiceDetailsService
                 'price' => ($validatedData['price']),
                 'status' => 'pending'
             ]);
-            
+
             // Create service detail
             $serviceDetail = ServiceDetails::create([
                 'order_id' => $order->order_id,
@@ -227,16 +230,32 @@ class ServiceDetailsService
                 'business_property' => $validatedData['business_property'] ?? null,
                 'cleaning_solvents' => $validatedData['cleaning_solvents'] ?? null,
                 'Equipment' => $validatedData['Equipment'] ?? null,
+                'free_estimate' => $validatedData['free_estimate'] ?? null,
+                'time_zoon' => $validatedData['time_zoon'] ?? null,
                 'status' => 'pending'
             ]);
-            
+
+            // Save personal information if provided
+            if (isset($validatedData['free_estimate'])) {
+
+                $reStockingItems = ReStockingChecklist::where('category', $validatedData['free_estimate'])->get();
+
+                // Create entries in ReStockingChecklistDetails for each found item
+                foreach ($reStockingItems as $item) {
+                    ReStockingChecklistDetails::create([
+                        're_stocking_checklist_id' => $item->id,
+                        'service_detail_id' => $serviceDetail->id,
+                    ]);
+                }
+            }
+
             // Save personal information if provided
             if (isset($validatedData['personal_information'])) {
                 $personalInformation = $validatedData['personal_information'];
                 $personalInformation['service_detail_id'] = $serviceDetail->id;
                 PersonalInformations::create($personalInformation);
             }
-            
+
             // Save package details if provided
             if (isset($validatedData['package_details'])) {
                 foreach ($validatedData['package_details'] as $packageDetail) {
@@ -248,7 +267,7 @@ class ServiceDetailsService
                     ]);
                 }
             }
-            
+
             // Save reStock details if provided
             if (isset($validatedData['reStock_details'])) {
                 foreach ($validatedData['reStock_details'] as $reStockDetail) {
@@ -258,7 +277,7 @@ class ServiceDetailsService
                     ]);
                 }
             }
-            
+
             // Save item details if provided
             if (isset($validatedData['cleaning_item'])) {
                 foreach ($validatedData['cleaning_item'] as $item) {
@@ -270,7 +289,7 @@ class ServiceDetailsService
                     ]);
                 }
             }
-            
+
             // Create a payment record
             $payment = Payment::create([
                 'order_id' => $order->order_id,
@@ -278,10 +297,10 @@ class ServiceDetailsService
                 'payment_method' => $validatedData['payment_method'],
                 'status' => 'pending'
             ]);
-            
+
             // DO NOT COMMIT transaction here!
             // We'll commit only after payment is successful
-            
+
             return [
                 'customer' => $customer,
                 'customerId' => $customerId,
@@ -294,7 +313,7 @@ class ServiceDetailsService
             throw $e;
         }
     }
-    
+
     private function initiatePayPalPayment($result)
     {
         try {
@@ -302,23 +321,25 @@ class ServiceDetailsService
             if (!$this->paypalClient) {
                 throw new Exception('PayPal client is not initialized. Please check your credentials in the .env file.');
             }
-            
+
             $request = new OrdersCreateRequest();
             $request->prefer('return=representation');
-            
+
             // Log request data (excluding sensitive information)
             Log::info('Creating PayPal order for Order ID: ' . $result['order']->order_id . ' with amount: ' . $result['order']->price);
-            
+
             $request->body = [
                 'intent' => 'CAPTURE',
-                'purchase_units' => [[
-                    'reference_id' => $result['order']->order_id,
-                    'description' => 'Service Order',
-                    'amount' => [
-                        'value' => $result['order']->price,
-                        'currency_code' => 'USD'
+                'purchase_units' => [
+                    [
+                        'reference_id' => $result['order']->order_id,
+                        'description' => 'Service Order',
+                        'amount' => [
+                            'value' => $result['order']->price,
+                            'currency_code' => 'USD'
+                        ]
                     ]
-                ]],
+                ],
                 'application_context' => [
                     'cancel_url' => route('payment.cancel', ['orderId' => $result['order']->order_id]),
                     'return_url' => route('payment.success', ['orderId' => $result['order']->order_id, 'method' => 'paypal']),
@@ -327,12 +348,12 @@ class ServiceDetailsService
                     'user_action' => 'PAY_NOW',
                 ]
             ];
-            
+
             $response = $this->paypalClient->execute($request);
-            
+
             // Log successful response (excluding sensitive parts)
             Log::info('PayPal order created successfully. PayPal order ID: ' . $response->result->id);
-            
+
             // Extract approval URL to redirect user to PayPal
             $approvalUrl = null;
             foreach ($response->result->links as $link) {
@@ -341,13 +362,13 @@ class ServiceDetailsService
                     break;
                 }
             }
-            
+
             // Update the payment record (but this will only be committed if the whole transaction succeeds)
             $result['payment']->update([
                 'transaction_id' => $response->result->id,
                 'payment_data' => json_encode($response->result)
             ]);
-            
+
             return [
                 'success' => true,
                 'approval_url' => $approvalUrl,
@@ -356,7 +377,7 @@ class ServiceDetailsService
         } catch (Exception $e) {
             // Log the error with detailed information
             Log::error('PayPal payment initiation failed: ' . $e->getMessage());
-            
+
             // Check for specific PayPal error messages
             $errorMsg = $e->getMessage();
             if (strpos($errorMsg, 'invalid_client') !== false) {
@@ -366,25 +387,27 @@ class ServiceDetailsService
             }
         }
     }
-    
+
     private function initiateStripePayment($result)
     {
         $service = Service::find($result['serviceDetail']->service_id);
-        
+
         try {
             $session = StripeSession::create([
                 'payment_method_types' => ['card'],
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'usd',
-                        'product_data' => [
-                            'name' => $service->name,
-                            'description' => 'Service booking on ' . $result['serviceDetail']->date,
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => 'usd',
+                            'product_data' => [
+                                'name' => $service->name,
+                                'description' => 'Service booking on ' . $result['serviceDetail']->date,
+                            ],
+                            'unit_amount' => (int) ($result['order']->price * 100), // Convert to cents
                         ],
-                        'unit_amount' => (int)($result['order']->price * 100), // Convert to cents
-                    ],
-                    'quantity' => 1,
-                ]],
+                        'quantity' => 1,
+                    ]
+                ],
                 'mode' => 'payment',
                 'success_url' => route('payment.success', ['orderId' => $result['order']->order_id, 'method' => 'stripe', 'session_id' => '{CHECKOUT_SESSION_ID}']),
                 'cancel_url' => route('payment.cancel', ['orderId' => $result['order']->order_id]),
@@ -392,13 +415,13 @@ class ServiceDetailsService
                     'order_id' => $result['order']->order_id
                 ]
             ]);
-            
+
             // Update the payment record (but this will only be committed if the whole transaction succeeds)
             $result['payment']->update([
                 'transaction_id' => $session->id,
                 'payment_data' => json_encode($session)
             ]);
-            
+
             return [
                 'success' => true,
                 'checkout_url' => $session->url,
@@ -410,22 +433,22 @@ class ServiceDetailsService
             throw new Exception('Failed to initialize Stripe payment: ' . $e->getMessage());
         }
     }
-    
+
     public function handlePaymentSuccess(Request $request, $orderId, $method)
     {
         // Retrieve and resume the transaction
         DB::beginTransaction();
-        
+
         try {
             $order = Order::findOrFail($orderId);
             $payment = Payment::where('order_id', $orderId)->firstOrFail();
-            
+
             if ($method === 'paypal') {
                 // Capture the PayPal payment
                 $paypalOrderId = $request->input('token'); // PayPal returns the order ID as 'token'
                 $request = new OrdersCaptureRequest($paypalOrderId);
                 $response = $this->paypalClient->execute($request);
-                
+
                 // Only update if payment was successful
                 if ($response->result->status === 'COMPLETED') {
                     // Update payment record
@@ -434,21 +457,21 @@ class ServiceDetailsService
                         'transaction_id' => $response->result->id,
                         'payment_data' => json_encode($response->result)
                     ]);
-                    
+
                     // Update order status
                     $order->update(['status' => 'active']);
-                    
+
                     // Update service detail status
                     $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
                     $serviceDetail->update(['status' => 'confirmed']);
-                    
+
                     // Now we can commit the transaction because payment was successful
                     DB::commit();
-                    
+
                     // Send confirmation email
                     $customer = Customer::find($order->customer_id);
                     $this->sendEmail($customer->email, $order->customer_id);
-                    
+
                     return response()->json([
                         'status' => 'success',
                         'message' => 'Payment completed successfully'
@@ -456,16 +479,16 @@ class ServiceDetailsService
                 } else {
                     // Payment failed or incomplete, roll back
                     DB::rollBack();
-                    
+
                     return response()->json([
                         'status' => 'error',
                         'message' => 'PayPal payment was not completed'
                     ], 400);
                 }
-            } else if ($method === 'stripe'){ // Stripe
+            } else if ($method === 'stripe') { // Stripe
                 $sessionId = $request->input('session_id');
                 $session = StripeSession::retrieve($sessionId);
-                
+
                 // Only update if payment was successful
                 if ($session->payment_status === 'paid') {
                     // Update payment record
@@ -474,21 +497,21 @@ class ServiceDetailsService
                         'transaction_id' => $session->payment_intent,
                         'payment_data' => json_encode($session)
                     ]);
-                    
+
                     // Update order status
                     $order->update(['status' => 'active']);
-                    
+
                     // Update service detail status
                     $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
                     $serviceDetail->update(['status' => 'confirmed']);
-                    
+
                     // Now we can commit the transaction because payment was successful
                     DB::commit();
-                    
+
                     // Send confirmation email
                     $customer = Customer::find($order->customer_id);
                     $this->sendEmail($customer->email, $order->customer_id);
-                    
+
                     return response()->json([
                         'status' => 'success',
                         'message' => 'Payment completed successfully'
@@ -496,7 +519,7 @@ class ServiceDetailsService
                 } else {
                     // Payment failed or incomplete, roll back
                     DB::rollBack();
-                    
+
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Stripe payment was not completed'
@@ -510,33 +533,33 @@ class ServiceDetailsService
                     'transaction_id' => 'DIRECT-' . time() . '-' . $orderId,
                     'payment_data' => json_encode(['method' => $method, 'date' => now()])
                 ]);
-                
+
                 // Update order status
                 $order->update(['status' => 'active']);
-                
+
                 // Update service detail status
                 $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
                 $serviceDetail->update(['status' => 'confirmed']);
-                
+
                 // Now we can commit the transaction
                 DB::commit();
-                
+
                 // Send confirmation email
                 $customer = Customer::find($order->customer_id);
                 $this->sendEmail($customer->email, $order->customer_id);
-                
+
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Order completed successfully with ' . $method
                 ]);
             }
-            
+
         } catch (Exception $e) {
             // Roll back on any exception
             DB::rollBack();
-            
+
             Log::error('Payment completion failed: ' . $e->getMessage());
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to complete payment',
@@ -544,20 +567,20 @@ class ServiceDetailsService
             ], 500);
         }
     }
-    
+
     public function handlePaymentCancel($orderId)
     {
         DB::rollBack();
-        
+
         try {
-            
+
             return response()->json([
                 'status' => 'cancelled',
                 'message' => 'Payment was cancelled'
             ]);
         } catch (Exception $e) {
             Log::error('Error handling payment cancellation: ' . $e->getMessage());
-            
+
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to process payment cancellation',
@@ -565,7 +588,7 @@ class ServiceDetailsService
             ], 500);
         }
     }
-   
+
     private function sendEmail($email, $customerId)
     {
         try {
@@ -584,7 +607,7 @@ class ServiceDetailsService
                 'service' => $service,
                 'packageDetails' => $packageDetails
             ];
-            
+
             // List of additional company email addresses
             $companyEmails = [
                 'Info@Pearlyskyplc.com',
@@ -596,15 +619,15 @@ class ServiceDetailsService
                 'anushatan@pearlyskyplc.com',
                 'oshanhb@pearlyskyplc.com'
             ];
-            
+
             // Send email to customer
             \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data));
             Log::info("Email sent successfully to customer: {$email}");
-            
+
             // Send the same email to all company email addresses
             \Mail::to($companyEmails)->send(new \App\Mail\ServiceOrderConfirmation($data));
             Log::info("Email sent successfully to company emails: " . implode(', ', $companyEmails));
-            
+
             return true;
         } catch (Exception $e) {
             Log::error("Failed to send email. Error: " . $e->getMessage());

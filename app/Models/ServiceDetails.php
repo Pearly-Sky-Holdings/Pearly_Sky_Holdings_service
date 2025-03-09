@@ -29,6 +29,8 @@ class ServiceDetails extends Model
         'request_language',
         'business_property',
         'frequency',
+        'free_estimate',
+        'time_zoon',
         'request_gender',
         'cleaning_solvents',
         'Equipment',
