@@ -16,7 +16,7 @@ class CreatePaymentsTable extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id('id');
             $table->foreignId(column: 'order_id')->constrained('orders', 'order_id')->onDelete('cascade');
-            $table->decimal('amount', 10, 2);
+            $table->string('amount');
             $table->string('payment_method'); // paypal, stripe
             $table->string('status'); // pending, completed, failed, cancelled
             $table->string('transaction_id')->nullable(); // Payment gateway reference ID
