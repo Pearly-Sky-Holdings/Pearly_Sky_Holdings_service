@@ -43,7 +43,7 @@ class CustomerControllers extends Controller
 
     foreach ($customers as $customer) {
       // Get service details for this customer
-      $serviceDetails = ServiceDetails::with('service')->where('customer_id', $customer->customer_id)
+      $serviceDetails = ServiceDetails::with('service', 'ItemDetails', 'packageDetails')->where('customer_id', $customer->customer_id)
         ->get();
 
       // Get order details for this customer
