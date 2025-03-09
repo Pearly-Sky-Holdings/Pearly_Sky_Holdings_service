@@ -26,15 +26,35 @@ class ServiceDetailsService
     
     public function __construct()
     {
-        // Initialize PayPal client if needed
-        $paypalEnv = new SandboxEnvironment(
-            config('services.paypal.client_id'),
-            config('services.paypal.secret')
-        );
-        $this->paypalClient = new PayPalHttpClient($paypalEnv);
-        
-        // Initialize Stripe
-        Stripe::setApiKey(config('services.stripe.secret'));
+        try {
+            // Initialize PayPal client with proper error handling
+            $clientId = config('services.paypal.client_id');
+            $clientSecret = config('services.paypal.secret');
+            
+            // Log the initialization attempt (but not the credentials)
+            Log::info('Initializing PayPal client');
+            
+            // Check if credentials exist
+            if (empty($clientId) || empty($clientSecret)) {
+                Log::error('PayPal credentials are missing or empty');
+                throw new Exception('PayPal credentials are not properly configured');
+            }
+            
+            $paypalEnv = new SandboxEnvironment($clientId, $clientSecret);
+            $this->paypalClient = new PayPalHttpClient($paypalEnv);
+            
+            // Initialize Stripe with proper error handling
+            $stripeKey = config('services.stripe.secret');
+            if (empty($stripeKey)) {
+                Log::error('Stripe key is missing or empty');
+                throw new Exception('Stripe is not properly configured');
+            }
+            
+            Stripe::setApiKey($stripeKey);
+        } catch (Exception $e) {
+            Log::error('Payment gateway initialization failed: ' . $e->getMessage());
+            // Don't throw here, let the service function handle errors when methods are called
+        }
     }
     
     public function save(Request $request)
@@ -72,6 +92,11 @@ class ServiceDetailsService
             
             // Now initiate payment based on selected method
             if ($validatedData['payment_method'] == 'paypal') {
+                // Check if PayPal client is properly initialized
+                if (!$this->paypalClient) {
+                    throw new Exception('PayPal client is not properly initialized. Check your credentials.');
+                }
+                
                 $paymentResponse = $this->initiatePayPalPayment($result);
                 
                 // Store order ID in user session or cache for later retrieval
@@ -104,6 +129,8 @@ class ServiceDetailsService
         } catch (Exception $e) {
             // Roll back the transaction if any exception occurs
             DB::rollBack();
+            
+            Log::error('Service details save failed: ' . $e->getMessage());
             
             return response()->json([
                 'status' => 'error',
@@ -270,30 +297,41 @@ class ServiceDetailsService
     
     private function initiatePayPalPayment($result)
     {
-        $request = new OrdersCreateRequest();
-        $request->prefer('return=representation');
-        
-        $request->body = [
-            'intent' => 'CAPTURE',
-            'purchase_units' => [[
-                'reference_id' => $result['order']->order_id,
-                'description' => 'Service Order',
-                'amount' => [
-                    'value' => $result['order']->price,
-                    'currency_code' => 'USD'
-                ]
-            ]],
-            'application_context' => [
-                'cancel_url' => route('payment.cancel', ['orderId' => $result['order']->order_id]),
-                'return_url' => route('payment.success', ['orderId' => $result['order']->order_id, 'method' => 'paypal']),
-                'brand_name' => 'PearlySky PLC',
-                'shipping_preference' => 'NO_SHIPPING',
-                'user_action' => 'PAY_NOW',
-            ]
-        ];
-        
         try {
+            // Double-check PayPal client initialization
+            if (!$this->paypalClient) {
+                throw new Exception('PayPal client is not initialized. Please check your credentials in the .env file.');
+            }
+            
+            $request = new OrdersCreateRequest();
+            $request->prefer('return=representation');
+            
+            // Log request data (excluding sensitive information)
+            Log::info('Creating PayPal order for Order ID: ' . $result['order']->order_id . ' with amount: ' . $result['order']->price);
+            
+            $request->body = [
+                'intent' => 'CAPTURE',
+                'purchase_units' => [[
+                    'reference_id' => $result['order']->order_id,
+                    'description' => 'Service Order',
+                    'amount' => [
+                        'value' => $result['order']->price,
+                        'currency_code' => 'USD'
+                    ]
+                ]],
+                'application_context' => [
+                    'cancel_url' => route('payment.cancel', ['orderId' => $result['order']->order_id]),
+                    'return_url' => route('payment.success', ['orderId' => $result['order']->order_id, 'method' => 'paypal']),
+                    'brand_name' => 'PearlySky PLC',
+                    'shipping_preference' => 'NO_SHIPPING',
+                    'user_action' => 'PAY_NOW',
+                ]
+            ];
+            
             $response = $this->paypalClient->execute($request);
+            
+            // Log successful response (excluding sensitive parts)
+            Log::info('PayPal order created successfully. PayPal order ID: ' . $response->result->id);
             
             // Extract approval URL to redirect user to PayPal
             $approvalUrl = null;
@@ -316,9 +354,16 @@ class ServiceDetailsService
                 'paypal_order_id' => $response->result->id
             ];
         } catch (Exception $e) {
-            // No need to roll back here, as the parent function will handle it
+            // Log the error with detailed information
             Log::error('PayPal payment initiation failed: ' . $e->getMessage());
-            throw new Exception('Failed to initialize PayPal payment: ' . $e->getMessage());
+            
+            // Check for specific PayPal error messages
+            $errorMsg = $e->getMessage();
+            if (strpos($errorMsg, 'invalid_client') !== false) {
+                throw new Exception('Failed to initialize PayPal payment: Invalid client credentials. Please check your PayPal Client ID and Secret in your .env file.');
+            } else {
+                throw new Exception('Failed to initialize PayPal payment: ' . $e->getMessage());
+            }
         }
     }
     

@@ -19,7 +19,8 @@ class ServiceOrderConfirmation extends Mailable
 
     public function build()
     {
-        return $this->subject('Service Order Confirmation')
-                   ->view('emails.service-order-confirmation');
+        return $this->from('nipuna315np@gmail.com', 'PearlySky PLC')
+            ->subject('Service Order Confirmation')
+            ->view('emails.service-order-confirmation');
     }
 }
