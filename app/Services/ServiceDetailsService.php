@@ -72,7 +72,7 @@ class ServiceDetailsService
                 'date' => 'required|date',
                 'time' => 'required',
                 'property_size' => 'nullable|string',
-                'duration' => 'nullable|integer',
+                'duration' => 'nullable|string',
                 'number_of_cleaners' => 'nullable|integer',
                 'note' => 'nullable|string',
                 'request_gender' => 'nullable|string',

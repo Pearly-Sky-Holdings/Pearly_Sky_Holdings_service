@@ -34,9 +34,6 @@ class CustomerControllers extends Controller
   {
     $customers = DB::table('customers')
       ->where('customer_id', 'LIKE', '%' . $input . '%')
-      ->orWhere('first_name', 'LIKE', '%' . $input . '%')
-      ->orWhere('last_name', 'LIKE', '%' . $input . '%')
-      ->orWhere('email', 'LIKE', '%' . $input . '%')
       ->get();
 
     $result = [];
