@@ -47,17 +47,17 @@ class ServiceDetails extends Model
 
     public function service()
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsTo(Service::class, 'service_id');
     }
 
     public function packageDetails(): HasMany
     {
-        return $this->hasMany(PackageDetail::class);
+        return $this->hasMany(PackageDetail::class,"id");
     }
 
     public function ItemDetails(): HasMany
     {
-        return $this->hasMany(ItemDetails::class);
+        return $this->hasMany(ItemDetails::class,"id");
     }
 
     public function serviceWithReStocking()
