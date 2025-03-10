@@ -23,8 +23,8 @@ class CustomerSeeder extends Seeder
             'province' => 'Western',
             'postal_code' => '10100',
             'contact' => '0771234567',
-            'email' => 'kasun@example.com',
-            'password' => Hash::make('1234')
+            'email' => 'nipuna315np@gmail.com',
+            'password' => Hash::make('123456')
         ]);
     }
 }

@@ -12,6 +12,10 @@ use App\Http\Controllers\ReStockingChecklistControllers;
 
 
 Route::post('/login', [AuthControllers::class, 'login'])->name('login');
+// New password reset routes
+Route::post('/forgot_password', [AuthControllers::class, 'forgotPassword']);
+Route::post('/verify_otp', [AuthControllers::class, 'verifyOtp']);
+Route::post('/reset_password', [AuthControllers::class, 'verifyOtpAndResetPassword']);
 
 //packages
 Route::get('/service_with_packages/{id}/', [PackegesControllers::class, 'getPackagesByService'])->name('getPackagesByService');
