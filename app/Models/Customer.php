@@ -32,10 +32,6 @@ class Customer extends Model
         'password'
     ];
 
-    public function setPasswordAttribute($value)
-    {
-        $this->attributes['password'] = bcrypt($value);
-    }
 
     public function orders()
     {
