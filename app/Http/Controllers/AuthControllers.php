@@ -15,14 +15,19 @@ class AuthControllers extends Controller
     public function login(Request $request)
     {
         $fields = $request->validate([
-            'type'=>'required',
             'email' => 'required|email',
             'password' => 'required|min:4|max:12'
         ]);
 
-        $user = User::where('email', $fields['email'])->first();
+        $user = Customer::where('email', $fields['email'])->first();
+        Log::info($user);
+        if (!$user) {
+            $user = Employee::where('email', $fields['email'])->first();
+Log::info("1");
+            Log::info($user);
+        }
 
-        if (!$user || !Hash::check($fields['password'], $user->password) || $user->type !== $fields['type']) {
+        if (!$user || !Hash::check($fields['password'], $user->password)) {
             return response(['message' => 'Bad credits'], 401);
         }
 
