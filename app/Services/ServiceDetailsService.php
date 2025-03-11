@@ -396,6 +396,12 @@ class ServiceDetailsService
         $service = Service::find($result['serviceDetail']->service_id);
 
         try {
+            // Clean the price value to ensure it's a valid number format without currency symbols
+            $price = preg_replace('/[^0-9.]/', '', $result['order']->price);
+            
+            // Convert to float first, then to integer cents
+            $priceInCents = (int)(floatval($price) * 100);
+            
             $session = StripeSession::create([
                 'payment_method_types' => ['card'],
                 'line_items' => [
@@ -406,7 +412,7 @@ class ServiceDetailsService
                                 'name' => $service->name,
                                 'description' => 'Service booking on ' . $result['serviceDetail']->date,
                             ],
-                            'unit_amount' => (int) ($result['order']->price * 100), // Convert to cents
+                            'unit_amount' => $priceInCents, // Use the properly sanitized and converted price
                         ],
                         'quantity' => 1,
                     ]
@@ -488,7 +494,7 @@ class ServiceDetailsService
                         'message' => 'PayPal payment was not completed'
                     ], 400);
                 }
-            } else if ($method === 'stripe') { // Stripe
+            } elseif ($method === 'stripe') { // Stripe
                 $sessionId = $request->input('session_id');
                 $session = StripeSession::retrieve($sessionId);
 
