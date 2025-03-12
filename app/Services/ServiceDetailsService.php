@@ -111,7 +111,7 @@ class ServiceDetailsService
                     'payment_url' => $paymentResponse['approval_url'],
                     'order_id' => $result['order']->order_id
                 ]);
-            } else if ($validatedData['payment_method'] == 'stripe') { // Stripe
+            } else if ($validatedData['payment_method'] == 'stripe' || $validatedData['payment_method'] == 'card') { // Stripe or card payments
                 $paymentResponse = $this->initiateStripePayment($result);
 
                 // Store order ID in user session or cache for later retrieval
@@ -119,7 +119,7 @@ class ServiceDetailsService
 
                 return response()->json([
                     'status' => 'pending_payment',
-                    'message' => 'Please complete payment with Stripe',
+                    'message' => 'Please complete payment with your card',
                     'payment_url' => $paymentResponse['checkout_url'],
                     'session_id' => $paymentResponse['session_id'],
                     'order_id' => $result['order']->order_id
@@ -218,6 +218,8 @@ class ServiceDetailsService
                 'customer_id' => $customerId,
                 'service_id' => $validatedData['service_id'],
                 'price' => $validatedData['price'],
+                'advance_payment' => "€30",
+                'remaining_payment' => "$validatedData['price'] - €30",
                 'date' => $validatedData['date'],
                 'time' => $validatedData['time'],
                 'property_size' => $validatedData['property_size'] ?? null,
@@ -403,7 +405,7 @@ class ServiceDetailsService
             $priceInCents = (int)(floatval($price) * 100);
             
             $session = StripeSession::create([
-                'payment_method_types' => ['card'],
+                'payment_method_types' => ['card'], // Explicitly specify card as the payment method
                 'line_items' => [
                     [
                         'price_data' => [
@@ -411,6 +413,7 @@ class ServiceDetailsService
                             'product_data' => [
                                 'name' => $service->name,
                                 'description' => 'Service booking on ' . $result['serviceDetail']->date,
+                                'images' => [], // You can add product images if available
                             ],
                             'unit_amount' => $priceInCents, // Use the properly sanitized and converted price
                         ],
@@ -421,13 +424,28 @@ class ServiceDetailsService
                 'success_url' => route('payment.success', ['orderId' => $result['order']->order_id, 'method' => 'stripe', 'session_id' => '{CHECKOUT_SESSION_ID}']),
                 'cancel_url' => route('payment.cancel', ['orderId' => $result['order']->order_id]),
                 'metadata' => [
-                    'order_id' => $result['order']->order_id
-                ]
+                    'order_id' => $result['order']->order_id,
+                    'customer_id' => $result['customerId'],
+                    'service_id' => $result['serviceDetail']->service_id
+                ],
+                'payment_intent_data' => [
+                    'description' => 'Order #' . $result['order']->order_id . ' - ' . $service->name,
+                    'metadata' => [
+                        'order_id' => $result['order']->order_id,
+                        'customer_id' => $result['customerId'],
+                        'service_name' => $service->name
+                    ]
+                ],
+                'customer_email' => $result['customer']->email ?? null, // Pre-fill customer email if available
+                'locale' => 'auto', // Auto-detect the user's preferred language
+                'allow_promotion_codes' => true, // Enable promotion codes if you want to use them
+                'billing_address_collection' => 'required', // Collect billing address for better fraud protection
             ]);
 
             // Update the payment record (but this will only be committed if the whole transaction succeeds)
             $result['payment']->update([
                 'transaction_id' => $session->id,
+                'payment_method' => 'card',
                 'payment_data' => json_encode($session)
             ]);
 
@@ -494,7 +512,7 @@ class ServiceDetailsService
                         'message' => 'PayPal payment was not completed'
                     ], 400);
                 }
-            } elseif ($method === 'stripe') { // Stripe
+            } elseif ($method === 'stripe' || $method === 'card') { // Stripe or card payments
                 $sessionId = $request->input('session_id');
                 $session = StripeSession::retrieve($sessionId);
 
@@ -503,6 +521,7 @@ class ServiceDetailsService
                     // Update payment record
                     $payment->update([
                         'status' => 'completed',
+                        'payment_method' => 'card',
                         'transaction_id' => $session->payment_intent,
                         'payment_data' => json_encode($session)
                     ]);
@@ -523,7 +542,7 @@ class ServiceDetailsService
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'Payment completed successfully'
+                        'message' => 'Card payment completed successfully'
                     ]);
                 } else {
                     // Payment failed or incomplete, roll back
@@ -531,7 +550,7 @@ class ServiceDetailsService
 
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Stripe payment was not completed'
+                        'message' => 'Card payment was not completed'
                     ], 400);
                 }
             } else {
@@ -582,7 +601,6 @@ class ServiceDetailsService
         DB::rollBack();
 
         try {
-
             return response()->json([
                 'status' => 'cancelled',
                 'message' => 'Payment was cancelled'

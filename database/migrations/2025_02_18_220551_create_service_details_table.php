@@ -17,6 +17,8 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained('customers', 'customer_id')->onDelete('cascade');
             $table->foreignId('service_id')->constrained('services', 'service_id')->onDelete('cascade');
             $table->string('price');
+            $table->string('advance_payment');
+            $table->string('remaining_payment');
             $table->date('date');
             $table->time('time');
             $table->string('property_size')->nullable();
