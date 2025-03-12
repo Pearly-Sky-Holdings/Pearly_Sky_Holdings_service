@@ -218,8 +218,6 @@ class ServiceDetailsService
                 'customer_id' => $customerId,
                 'service_id' => $validatedData['service_id'],
                 'price' => $validatedData['price'],
-                'advance_payment' => "€30",
-                'remaining_payment' => "$validatedData['price'] - €30",
                 'date' => $validatedData['date'],
                 'time' => $validatedData['time'],
                 'property_size' => $validatedData['property_size'] ?? null,

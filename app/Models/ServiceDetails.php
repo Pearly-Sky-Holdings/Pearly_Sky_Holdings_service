@@ -19,8 +19,6 @@ class ServiceDetails extends Model
         'customer_id',
         'service_id',
         'price',
-        'advance_payment',
-        'remaining_payment',
         'date',
         'time',
         'property_size',
