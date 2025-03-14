@@ -15,8 +15,8 @@ class ReStockingChecklist extends Model
 
     protected $fillable = [
         'name',
-        'price',
-        'status'
+        'category',
+        'type'
     ];
 
     public function serviceWithReStocking(): HasMany

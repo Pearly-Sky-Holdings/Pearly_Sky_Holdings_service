@@ -83,7 +83,7 @@ class ServiceDetailsService
                 'Equipment' => 'nullable|string',
 
                 'chemical' => 'nullable|string',
-                'things_to_clean' => 'array',
+                'things_to_clean' => 'nullable|string',
                 'location_from' => 'nullable|string',
                 'location_to' => 'nullable|string',
                 'materials' => 'nullable|string',
@@ -92,7 +92,7 @@ class ServiceDetailsService
                 'event_type' => 'nullable|string',
                 'pool_type' => 'nullable|string',
 
-                'free_estimate' => 'nullable|string',
+                'free_estimate' => 'nullable|array',
                 'time_zoon' => 'nullable|string',
                 'personal_information' => 'array',
                 'reStock_details' => 'array',
@@ -241,7 +241,6 @@ class ServiceDetailsService
                 'business_property' => $validatedData['business_property'] ?? null,
                 'cleaning_solvents' => $validatedData['cleaning_solvents'] ?? null,
                 'Equipment' => $validatedData['Equipment'] ?? null,
-                'free_estimate' => $validatedData['free_estimate'] ?? null,
                 'time_zoon' => $validatedData['time_zoon'] ?? null,
 
                 'chemical' => $validatedData['chemical'] ?? null,
@@ -256,18 +255,22 @@ class ServiceDetailsService
                 'status' => 'pending'
             ]);
 
+            Log::info("message");
             // Save personal information if provided
             if (isset($validatedData['free_estimate'])) {
+                foreach ($validatedData['free_estimate'] as $data) {
+                    Log::info($data);
+                    $reStockingItems = ReStockingChecklist::where('category', $data)->get();
 
-                $reStockingItems = ReStockingChecklist::where('category', $validatedData['free_estimate'])->get();
-
-                // Create entries in ReStockingChecklistDetails for each found item
-                foreach ($reStockingItems as $item) {
-                    ReStockingChecklistDetails::create([
-                        're_stocking_checklist_id' => $item->id,
-                        'service_detail_id' => $serviceDetail->id,
-                    ]);
+                    // Create entries in ReStockingChecklistDetails for each found item
+                    foreach ($reStockingItems as $item) {
+                        ReStockingChecklistDetails::create([
+                            're_stocking_checklist_id' => $item->id,
+                            'service_detail_id' => $serviceDetail->id,
+                        ]);
+                    }
                 }
+                
             }
 
             // Save personal information if provided

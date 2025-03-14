@@ -39,7 +39,7 @@ return new class extends Migration
             $table->string('options_type')->nullable();
             $table->string('pressure_washing_type')->nullable();
             $table->string('event_type')->nullable();
-            $table->string('time_pool_typezoon')->nullable();
+            $table->string('pool_type')->nullable();
 
 
             $table->text('note')->nullable();
