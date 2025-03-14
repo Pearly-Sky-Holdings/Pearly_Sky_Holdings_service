@@ -81,6 +81,17 @@ class ServiceDetailsService
                 'frequency' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
+
+                'chemical' => 'nullable|string',
+                'things_to_clean' => 'array',
+                'location_from' => 'nullable|string',
+                'location_to' => 'nullable|string',
+                'materials' => 'nullable|string',
+                'options_type' => 'nullable|string',
+                'pressure_washing_type' => 'nullable|string',
+                'event_type' => 'nullable|string',
+                'pool_type' => 'nullable|string',
+
                 'free_estimate' => 'nullable|string',
                 'time_zoon' => 'nullable|string',
                 'personal_information' => 'array',
@@ -232,6 +243,16 @@ class ServiceDetailsService
                 'Equipment' => $validatedData['Equipment'] ?? null,
                 'free_estimate' => $validatedData['free_estimate'] ?? null,
                 'time_zoon' => $validatedData['time_zoon'] ?? null,
+
+                'chemical' => $validatedData['chemical'] ?? null,
+                'things_to_clean' => $validatedData['things_to_clean'] ?? null,
+                'location_from' => $validatedData['location_from'] ?? null,
+                'location_to' => $validatedData['location_to'] ?? null,
+                'materials' => $validatedData['materials'] ?? null,
+                'options_type' => $validatedData['options_type'] ?? null,
+                'pressure_washing_type' => $validatedData['pressure_washing_type'] ?? null,
+                'event_type' => $validatedData['event_type'] ?? null,
+                'pool_type' => $validatedData['pool_type'] ?? null,
                 'status' => 'pending'
             ]);
 
