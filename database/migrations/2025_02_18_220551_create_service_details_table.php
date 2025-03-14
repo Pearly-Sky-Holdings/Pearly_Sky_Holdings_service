@@ -30,6 +30,18 @@ return new class extends Migration
             $table->string('Equipment')->nullable();
             $table->string('free_estimate')->nullable();
             $table->string('time_zoon')->nullable();
+
+            $table->string('chemical')->nullable();
+            $table->string('things_to_clean')->nullable();
+            $table->string('location_from')->nullable();
+            $table->string('location_to')->nullable();
+            $table->string('materials')->nullable();
+            $table->string('options_type')->nullable();
+            $table->string('pressure_washing_type')->nullable();
+            $table->string('event_type')->nullable();
+            $table->string('time_pool_typezoon')->nullable();
+
+
             $table->text('note')->nullable();
             $table->enum('status', ['pending', 'in_progress', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
