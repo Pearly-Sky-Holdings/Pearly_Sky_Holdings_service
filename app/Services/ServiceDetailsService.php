@@ -20,6 +20,8 @@ use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use PayPalCheckoutSdk\Core\SandboxEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
+use Illuminate\Support\Facades\Hash;
+
 
 class ServiceDetailsService
 {
@@ -203,6 +205,7 @@ class ServiceDetailsService
         try {
             // Handle customer creation or update
             if (!isset($validatedData['customer_id'])) {
+                $validatedData['customer']['password'] = Hash::make($validatedData['customer']['password']);
                 $customer = Customer::create($validatedData['customer']);
                 $result = DB::table('customers')
                     ->Where('email', 'LIKE', '%' . $customer->email . '%')

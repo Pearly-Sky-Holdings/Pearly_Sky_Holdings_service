@@ -84,7 +84,9 @@ Log::info("1");
         // Send email with OTP
         try {
             Mail::send('emails.reset_password', ['otp' => $otp], function ($message) use ($email) {
-                $message->to($email)->subject('Reset Password OTP');
+                $message
+                ->from('paniyapranks@gmail.com', 'PearlySky PLC')
+                ->to($email)->subject('Reset Password OTP');
             });
 
             return response([
@@ -100,14 +102,17 @@ Log::info("1");
 
     public function verifyOtpAndResetPassword(Request $request)
     {
+        Log::info("1");
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required|string',
-            'password' => 'required|min:6|confirmed'
+            'password' => 'required|string'
         ]);
 
         $email = $request->email;
         $otp = $request->otp;
+
+        Log::info("4");
 
         // Check if OTP exists and is valid
         $passwordReset = PasswordReset::where('email', $email)
@@ -115,11 +120,16 @@ Log::info("1");
             ->where('expires_at', '>', Carbon::now())
             ->first();
 
+            Log::info("5");
+
+
         if (!$passwordReset) {
             return response([
                 'message' => 'Invalid or expired OTP'
             ], 400);
         }
+
+        Log::info("6");
 
         // Update password based on user type
         if ($passwordReset->user_type === 'employee') {
@@ -127,23 +137,28 @@ Log::info("1");
         } else {
             $user = Customer::where('email', $email)->first();
         }
-
+Log::info($user);
         if (!$user) {
             return response([
                 'message' => 'User not found'
             ], 404);
         }
 
-        // Update password
-        $user->password = Hash::make($request->password);
-        $user->save();
-
-        // Delete the used OTP
-        $passwordReset->delete();
-
-        return response([
-            'message' => 'Password has been reset successfully'
-        ], 200);
+        try {
+            $user->password = Hash::make($request->password);
+            $result = $user->save();
+            
+            if (!$result) {
+                return response(['message' => 'Failed to update password'], 500);
+            }
+            
+            // Delete the used OTP
+            $passwordReset->delete();
+            
+            return response(['message' => 'Password has been reset successfully'], 200);
+        } catch (\Exception $e) {
+            return response(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 
     public function verifyOtp(Request $request)
