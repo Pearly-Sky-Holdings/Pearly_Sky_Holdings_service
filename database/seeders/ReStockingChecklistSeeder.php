@@ -16,11 +16,11 @@ class ReStockingChecklistSeeder extends Seeder
         $checklists = [
             ["name" => "Hand Soap", "category" => "Bathrooms", "type"=>"all"],
             ["name" => "Small Trash Bag", "category" => "Bathrooms", "type"=>"all"],
-            ["name" => "Shampoo,Conditioner,Body Wash", "category" => "Bathrooms", "type"=>"all"],
+            ["name" => "Shampoo,Conditioner", "category" => "Bathrooms", "type"=>"all"],
             ["name" => "4 Large Towels", "category" => "Bathrooms", "type"=>"all"],
-            ["name" => "2 Wash Rags, 1 Black Makeup Cloth", "category"=> "Bathrooms", "type"=>"all"],
+            ["name" => "2 Wash Rags", "category"=> "Bathrooms", "type"=>"all"],
             ["name" => "1 Floor Bath Mat", "category" => "Bathrooms", "type"=>"all"],
-            ["name" => "Makeup Remover Pack, Toothpaste, Toothpaste , Toothbrush", "category" => "Bathrooms", "type"=>"all"],
+            ["name" => "Makeup Remover Pack", "category" => "Bathrooms", "type"=>"all"],
             ["name" => "Toilet Paper", "category" => "Bathrooms", "type"=>"all"],
             
             ["name" => "Coffee Pods", "category" => "Kitchen", "type"=>"all"],
