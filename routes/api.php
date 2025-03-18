@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\JobApplicationControllers;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ServiceDetailsController;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +23,9 @@ Route::get('/service_with_packages/{id}/', [PackegesControllers::class, 'getPack
 
 //re_stocking_checklists
 Route::get('/re_stocking_checklists', [ReStockingChecklistControllers::class, 'getAll'])->name('getAll');
+
+//JobApplication api
+Route::post('/saveJobApplication', [JobApplicationControllers::class, 'save'])->name('save');
 
 //customer api
 Route::get('/getCustomers', [CustomerControllers::class, 'getAll'])->name('getAll');
