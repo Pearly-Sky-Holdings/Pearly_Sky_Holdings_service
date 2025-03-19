@@ -660,6 +660,8 @@ class ServiceDetailsService
                 'packageDetails' => $packageDetails
             ];
 
+            Log::info("Sending datar: " . json_encode($data));
+
             // List of additional company email addresses
             $companyEmails = [
                 'Info@Pearlyskyplc.com',
@@ -671,6 +673,8 @@ class ServiceDetailsService
                 'anushatan@pearlyskyplc.com',
                 'oshanhb@pearlyskyplc.com'
             ];
+
+            Log::info("Sending email to customer: {$email}");
 
             // Send email to customer
             \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data));
