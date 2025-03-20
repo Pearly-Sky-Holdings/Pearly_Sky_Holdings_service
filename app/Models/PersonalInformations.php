@@ -13,22 +13,9 @@ class PersonalInformations extends Model
     public $incrementing = true;
 
     protected $fillable = [
-        'first_name',
-        'middle_name',
-        'last_name',
-        'email',
-        'contact',
-        'address',
-        'apartment_type',
-        'city',
-        'province',
-        'postal_code',
-        'contry',
-        'request_care_professional',
-        'gender',
+        'name',
         'age',
-        'special_request',
-        'service_providing_place',
+        'gender',
         'service_detail_id',
     ];
 
