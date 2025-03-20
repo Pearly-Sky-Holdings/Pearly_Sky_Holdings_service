@@ -83,6 +83,7 @@ class ServiceDetailsService
                 'frequency' => 'nullable|string',
                 'cleaning_solvents' => 'nullable|string',
                 'Equipment' => 'nullable|string',
+                'special_request' => 'nullable|string',
 
                 'chemical' => 'nullable|string',
                 'things_to_clean' => 'nullable|string',
@@ -245,6 +246,7 @@ class ServiceDetailsService
                 'cleaning_solvents' => $validatedData['cleaning_solvents'] ?? null,
                 'Equipment' => $validatedData['Equipment'] ?? null,
                 'time_zoon' => $validatedData['time_zoon'] ?? null,
+                'special_request' => $validatedData['special_request'] ?? null,
 
                 'chemical' => $validatedData['chemical'] ?? null,
                 'things_to_clean' => $validatedData['things_to_clean'] ?? null,

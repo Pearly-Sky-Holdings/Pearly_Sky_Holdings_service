@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('Equipment')->nullable();
             $table->string('free_estimate')->nullable();
             $table->string('time_zoon')->nullable();
+            $table->string('special_request')->nullable();
 
             $table->string('chemical')->nullable();
             $table->string('things_to_clean')->nullable();

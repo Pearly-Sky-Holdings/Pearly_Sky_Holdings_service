@@ -36,6 +36,7 @@ class ServiceDetails extends Model
         'location_from',
         'location_to',
         'materials',
+        'special_request',
         'options_type',
         'pressure_washing_type',
         'event_type',
