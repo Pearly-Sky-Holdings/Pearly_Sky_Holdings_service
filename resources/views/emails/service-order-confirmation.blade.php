@@ -50,6 +50,7 @@
         table tr td {
             padding: 8px 5px;
             vertical-align: top;
+            color: #000000;
         }
         table tr td:first-child {
             font-weight: bold;
@@ -61,12 +62,10 @@
             padding: 15px;
             color: #0055a4;
             font-weight: bold;
-            box-shadow: 0px 4px 10px rgba(37, 150, 190, 0.5);
         }
         .footer img {
             margin-top: 10px;
             max-width: 100%;
-            box-shadow: 0px 4px 10px rgba(37, 150, 190, 0.5);
         }
         .note {
             margin-top: 30px;
