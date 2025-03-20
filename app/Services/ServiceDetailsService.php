@@ -280,9 +280,10 @@ class ServiceDetailsService
 
             // Save personal information if provided
             if (isset($validatedData['personal_information'])) {
-                $personalInformation = $validatedData['personal_information'];
-                $personalInformation['service_detail_id'] = $serviceDetail->id;
-                PersonalInformations::create($personalInformation);
+                foreach ($validatedData['personal_information'] as $personalInformation) {
+                    $personalInformation['service_detail_id'] = $serviceDetail->id;
+                    PersonalInformations::create($personalInformation);
+                }
             }
 
             // Save package details if provided
