@@ -17,6 +17,7 @@ class Order extends Model
         'date',
         'time',
         'price',
+        'qr_code',
         'status'
     ];
 
