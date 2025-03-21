@@ -63,4 +63,13 @@ class OrderController extends Controller
             ->get();
         return response()->json($orders, 200);
     }
+
+    public function show(Order $order)
+    {
+        // Return the order details view or JSON response
+        return response()->json([
+            'status' => 'success',
+            'order' => $order,
+        ]);
+    }
 }

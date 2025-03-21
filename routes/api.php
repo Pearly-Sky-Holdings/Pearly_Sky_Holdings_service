@@ -52,6 +52,7 @@ Route::post('/saveOrder', [OrderController::class, 'save'])->name('save');
 Route::put('/updateOrder/{id}', [OrderController::class, 'update'])->name('update');
 Route::delete('/deleteOrder/{id}', [OrderController::class, 'delete'])->name('delete');
 Route::get('/getOrdersByCustomer/{customerId}', [OrderController::class, 'getByCustomerId'])->name('getByCustomerId');
+Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
 //serviceDetails api
 Route::post('/saveServiceDetails', [ServiceDetailsController::class, 'save'])->name('save');
