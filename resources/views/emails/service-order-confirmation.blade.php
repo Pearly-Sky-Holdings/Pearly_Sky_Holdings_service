@@ -79,6 +79,11 @@
 </head>
 <body>
     <div class="container">
+
+        <h2>QR Code</h2>
+        <p>Please find the QR code for your order below:</p>
+        <img src="{{ $data['qrCodeUrl'] }}" alt="QR Code">
+
         <div class="header">
             <h1>Service Order Confirmation!</h1>
         </div>

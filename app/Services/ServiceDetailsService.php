@@ -1,5 +1,6 @@
 <?php
 namespace App\Services;
+
 use App\Models\Customer;
 use App\Models\ItemDetails;
 use App\Models\Order;
@@ -21,7 +22,9 @@ use PayPalCheckoutSdk\Core\SandboxEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Storage;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class ServiceDetailsService
 {
@@ -181,6 +184,12 @@ class ServiceDetailsService
             // Update service detail status
             $result['serviceDetail']->update(['status' => 'confirmed']);
 
+            // Generate QR code for the work order
+            $qrCodePath = $this->generateQrCode($result['order']->order_id);
+            
+            // Update the order with QR code path
+            $result['order']->update(['qr_code' => $qrCodePath]);
+
             // Now we can commit the transaction
             DB::commit();
 
@@ -190,7 +199,8 @@ class ServiceDetailsService
             return response()->json([
                 'status' => 'success',
                 'message' => 'Order completed successfully with ' . $paymentMethod,
-                'order_id' => $result['order']->order_id
+                'order_id' => $result['order']->order_id,
+                'qr_code' => $qrCodePath
             ]);
         } catch (Exception $e) {
             DB::rollBack();
@@ -224,7 +234,8 @@ class ServiceDetailsService
                 'date' => now()->toDateString(),
                 'time' => now()->toTimeString(),
                 'price' => ($validatedData['price']),
-                'status' => 'pending'
+                'status' => 'pending',
+                'qr_code' => null // Initially set QR code to null
             ]);
 
             // Create service detail
@@ -341,6 +352,43 @@ class ServiceDetailsService
         } catch (Exception $e) {
             // No need to roll back here, as the parent function will handle it
             throw $e;
+        }
+    }
+
+  
+    private function generateQrCode($orderId)
+    {
+        try {
+            Log::info('Generating QR code for order ID: ' . $orderId);
+            
+            // Generate QR code content - could be a URL to view the order details
+            $url = route('orders.show', $orderId);
+            
+            // Log the generated URL
+            Log::info('Generated URL for QR code: ' . $url);
+            
+            // Create a QR code instance
+            $qrCode = new QrCode($url);
+            
+            // Save the QR code as a PNG file
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+
+            $image="order". $orderId . '.png';
+            
+            // Define the file path
+            $filePath = 'qr-codes/' . $image;
+
+            
+            // Save the QR code to the storage disk
+            Storage::disk('public')->put($filePath, $result->getString());
+            Order::where('order_id', $orderId)->update(['qr_code' => $image]);
+            
+            return $filePath;
+        } catch (Exception $e) {
+            Log::error('Failed to generate QR code: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString()); // Log the stack trace for more details
+            return null;
         }
     }
 
@@ -520,6 +568,12 @@ class ServiceDetailsService
                     $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
                     $serviceDetail->update(['status' => 'confirmed']);
 
+                    // Generate QR code for the work order
+                    $qrCodePath = $this->generateQrCode($orderId);
+                    
+                    // Update the order with QR code path
+                    $order->update(['qr_code' => $qrCodePath]);
+
                     // Now we can commit the transaction because payment was successful
                     DB::commit();
 
@@ -529,7 +583,8 @@ class ServiceDetailsService
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'Payment completed successfully'
+                        'message' => 'Payment completed successfully',
+                        'qr_code' => $qrCodePath
                     ]);
                 } else {
                     // Payment failed or incomplete, roll back
@@ -561,6 +616,12 @@ class ServiceDetailsService
                     $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
                     $serviceDetail->update(['status' => 'confirmed']);
 
+                    // Generate QR code for the work order
+                    $qrCodePath = $this->generateQrCode($orderId);
+                    
+                    // Update the order with QR code path
+                    $order->update(['qr_code' => $qrCodePath]);
+
                     // Now we can commit the transaction because payment was successful
                     DB::commit();
 
@@ -570,7 +631,8 @@ class ServiceDetailsService
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'Card payment completed successfully'
+                        'message' => 'Card payment completed successfully',
+                        'qr_code' => $qrCodePath
                     ]);
                 } else {
                     // Payment failed or incomplete, roll back
@@ -597,6 +659,12 @@ class ServiceDetailsService
                 $serviceDetail = ServiceDetails::where('order_id', $orderId)->first();
                 $serviceDetail->update(['status' => 'confirmed']);
 
+                // Generate QR code for the work order
+                $qrCodePath = $this->generateQrCode($orderId);
+                
+                // Update the order with QR code path
+                $order->update(['qr_code' => $qrCodePath]);
+
                 // Now we can commit the transaction
                 DB::commit();
 
@@ -606,7 +674,8 @@ class ServiceDetailsService
 
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'Order completed successfully with ' . $method
+                    'message' => 'Order completed successfully with ' . $method,
+                    'qr_code' => $qrCodePath
                 ]);
             }
 
@@ -651,19 +720,35 @@ class ServiceDetailsService
             $latestOrder = Order::where('customer_id', $customerId)->latest()->first();
             $serviceDetail = ServiceDetails::where('order_id', $latestOrder->order_id)->first();
             $service = Service::find($serviceDetail->service_id);
+            
             // Get package details
             $packageDetails = PackageDetail::where('service_detail_id', $serviceDetail->id)
                 ->with('package')
                 ->get();
+                
+            // Get the QR code URL for the email
+            $qrCodeUrl = null;
+            if ($latestOrder->qr_code) {
+                // Check if the QR code file exists
+                if (Storage::disk('public')->exists($latestOrder->qr_code)) {
+                    // Get the correct public URL for the QR code
+                    $qrCodeUrl = asset('storage/' . $latestOrder->qr_code);
+                    Log::info("QR code URL: {$qrCodeUrl}");
+                } else {
+                    Log::warning("QR code file not found: {$latestOrder->qr_code}");
+                }
+            } else {
+                Log::warning("No QR code path saved for order: {$latestOrder->order_id}");
+            }
+            
             $data = [
                 'customer' => $customer,
                 'order' => $latestOrder,
                 'serviceDetail' => $serviceDetail,
                 'service' => $service,
-                'packageDetails' => $packageDetails
+                'packageDetails' => $packageDetails,
+                'qrCodeUrl' => $qrCodeUrl // Use public URL instead of local path
             ];
-
-            Log::info("Sending datar: " . json_encode($data));
 
             // List of additional company email addresses
             $companyEmails = [
@@ -676,15 +761,12 @@ class ServiceDetailsService
                 'anushatan@pearlyskyplc.com',
                 'oshanhb@pearlyskyplc.com'
             ];
-
-            Log::info("Sending email to customer: {$email}");
-
-            // Send email to customer
-            \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data));
-            Log::info("Email sent successfully to customer: {$email}");
-
-            // Send the same email to all company email addresses
-            \Mail::to($companyEmails)->send(new \App\Mail\ServiceOrderConfirmation($data));
+            
+            \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data, storage_path('app/public/' . $latestOrder->qr_code)));
+            Log::info("Sending data: " . json_encode($data));
+            
+            // Send email to customer with QR code attachment
+            \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data, storage_path('app/public/' . $latestOrder->qr_code)));
             Log::info("Email sent successfully to company emails: " . implode(', ', $companyEmails));
 
             return true;
