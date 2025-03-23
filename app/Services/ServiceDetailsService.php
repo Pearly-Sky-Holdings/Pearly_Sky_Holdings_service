@@ -374,7 +374,7 @@ class ServiceDetailsService
             $writer = new PngWriter();
             $result = $writer->write($qrCode);
 
-            $image="order". $orderId . '.png';
+            $image="order". $orderId . '.jpg';
             
             // Define the file path
             $filePath = 'qr-codes/' . $image;
@@ -740,15 +740,19 @@ class ServiceDetailsService
             } else {
                 Log::warning("No QR code path saved for order: {$latestOrder->order_id}");
             }
+
+            $image = "order" . $latestOrder->order_id . '.jpg';
             
             $data = [
                 'customer' => $customer,
                 'order' => $latestOrder,
+                'qr_image'=> $image,
                 'serviceDetail' => $serviceDetail,
                 'service' => $service,
-                'packageDetails' => $packageDetails,
-                'qrCodeUrl' => $qrCodeUrl // Use public URL instead of local path
+                'packageDetails' => $packageDetails
             ];
+
+            Log::info("ss data: " . json_encode($data));
 
             // List of additional company email addresses
             $companyEmails = [
@@ -759,7 +763,8 @@ class ServiceDetailsService
                 'Helpdesk@pearlyskyplc.com',
                 'shakilaib@pearlyskyplc.com',
                 'anushatan@pearlyskyplc.com',
-                'oshanhb@pearlyskyplc.com'
+                'oshanhb@pearlyskyplc.com',
+                'systempearlyskycleaningplc@gmail.com'
             ];
             
             \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data, storage_path('app/public/' . $latestOrder->qr_code)));
