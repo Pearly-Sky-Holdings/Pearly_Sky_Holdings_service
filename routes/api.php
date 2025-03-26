@@ -10,6 +10,7 @@ use App\Http\Controllers\PackegesControllers;
 use App\Http\Controllers\CustomerControllers;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\ReStockingChecklistControllers;
+use App\Http\Controllers\TranslationController;
 
 
 Route::post('/login', [AuthControllers::class, 'login'])->name('login');
@@ -57,6 +58,7 @@ Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.sh
 //serviceDetails api
 Route::post('/saveServiceDetails', [ServiceDetailsController::class, 'save'])->name('save');
 
+Route::post('/translate', [TranslationController::class, 'translate']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     //packeges api
