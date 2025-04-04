@@ -20,10 +20,7 @@ class JobApplicationControllers extends Controller
 
     public function save(Request $request)
   {
-    $this->jobApplicationService->save($request);
-    $request = DB::table('customers')
-      ->Where('email', 'LIKE', '%' . $request->email . '%')
-      ->get();
-    return response()->json($request, 201);
+    $saved = $this->jobApplicationService->save($request);
+    return response()->json($saved, 201);
   }
 }

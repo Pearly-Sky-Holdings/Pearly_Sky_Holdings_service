@@ -18,8 +18,9 @@ class PackegesControllers extends Controller
   }
 
 
-  public function getPackagesByService($serviceId)
+  public function getPackagesByService($serviceId, Request $request)
   {
+    $country = $request->query('country','EN');
     $service = ServicePackage::with('package')->where('service_id', $serviceId)
       ->get();
 
@@ -28,6 +29,9 @@ class PackegesControllers extends Controller
     }
 
     $packages = $service->pluck('package');
-    return response()->json($packages);
+    $translatedData = TranslationController::translateJson($packages->toArray(), $country);
+
+
+      return response()->json($translatedData, 200);
   }
 }

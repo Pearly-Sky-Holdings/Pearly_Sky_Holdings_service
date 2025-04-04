@@ -764,7 +764,8 @@ class ServiceDetailsService
                 'shakilaib@pearlyskyplc.com',
                 'anushatan@pearlyskyplc.com',
                 'oshanhb@pearlyskyplc.com',
-                'systempearlyskycleaningplc@gmail.com'
+                'systempearlyskycleaningplc@gmail.com',
+                'hrdreport@pearlyskyplc.com'
             ];
             
             \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation($data, storage_path('app/public/' . $latestOrder->qr_code)));
