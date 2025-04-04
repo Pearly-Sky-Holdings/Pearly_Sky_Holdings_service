@@ -39,19 +39,25 @@ class ServiceController extends Controller
   }
 
   // Get a specific service
-  public function search($id)
+  public function search($id, Request $request)
   {
       $service = Service::find($id);
-      
+      $country = $request->query('country','EN');
+
       if (!$service) {
           return response()->json([
               'status' => 'error',
-              'message' => 'Service not found'
+              'message' => 'Service not found',
           ], 404);
       }
-      
-      return response()->json($service,200);
+
+       // Translate entire JSON response
+       $translatedData = TranslationController::translateJson($service->toArray(), $country);
+
+
+      return response()->json($translatedData, 200);
   }
+
 
 
   // Delete a service

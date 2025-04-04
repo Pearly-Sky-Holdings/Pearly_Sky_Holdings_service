@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Services\FeedbackService;
+use Illuminate\Support\Facades\Log;
 
 class FeedbackController extends Controller
 {
@@ -23,9 +25,11 @@ class FeedbackController extends Controller
   }
   
 
-  public function getAll()
+  public function getAll(Request $request)
   {
-    $customer = DB::table('feedback')->get();
-    return response()->json($customer,200);
+    $country = $request->query('country','EN');
+    $feedback = Feedback::all();
+    $translatedData = TranslationController::translateJson($feedback->toArray(), $country);
+    return response()->json($translatedData,200);
   }
 }

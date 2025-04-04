@@ -25,6 +25,7 @@ class JobApplication extends Model
         'postal_code',
         'contact',
         'email',
+        "pdf"
     ];
 
 }
