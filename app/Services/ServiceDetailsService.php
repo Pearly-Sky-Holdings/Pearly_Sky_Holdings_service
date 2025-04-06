@@ -503,8 +503,6 @@ class ServiceDetailsService
                 'payment' => $translatePayment,
             ];
 
-            Log::info(("ok-----------"));
-            Log::info($serviceDetail);
 
             \Mail::to($email)->send(new \App\Mail\ServiceOrderConfirmation(
                 $data,
@@ -532,7 +530,7 @@ class ServiceDetailsService
             
             foreach ($companyEmails as $companyEmail) {
                 \Mail::to($companyEmail)->send(new \App\Mail\ServiceOrderConfirmation(
-                    $englishData ?? $data,
+                    $data,
                     storage_path('app/public/' . $order->qr_code)
                 ));
             }
