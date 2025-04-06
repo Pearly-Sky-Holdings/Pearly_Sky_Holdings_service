@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use App\Models\Service;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 

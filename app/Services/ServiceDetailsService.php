@@ -520,14 +520,14 @@ class ServiceDetailsService
             }
 
             $companyEmails = [
-                // 'Info@Pearlyskyplc.com',
-                // 'support@pearlyskyplc.com',
-                // 'Sales@pearlyskyplc.com',
-                // 'Helpdesk@pearlyskyplc.com',
-                // 'shakilaib@pearlyskyplc.com',
-                // 'anushatan@pearlyskyplc.com',
-                // 'oshanhb@pearlyskyplc.com',
-                // 'systempearlyskycleaningplc@gmail.com'
+                'Info@Pearlyskyplc.com',
+                'support@pearlyskyplc.com',
+                'Sales@pearlyskyplc.com',
+                'Helpdesk@pearlyskyplc.com',
+                'shakilaib@pearlyskyplc.com',
+                'anushatan@pearlyskyplc.com',
+                'oshanhb@pearlyskyplc.com',
+                'systempearlyskycleaningplc@gmail.com'
             ];
             
             foreach ($companyEmails as $companyEmail) {
