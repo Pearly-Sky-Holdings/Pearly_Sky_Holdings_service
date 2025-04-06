@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerMassageControllers;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\JobApplicationControllers;
 use App\Http\Controllers\OrderController;
@@ -45,6 +46,8 @@ Route::delete('/deleteService/{id}', [ServiceController::class, 'destroy'])->nam
 //feedback api
 Route::get('/getFeedback', [FeedbackController::class, 'getAll'])->name('getAll');
 Route::post('/saveFeedback', [FeedbackController::class, 'save'])->name('save');
+
+Route::post('/saveMassage', [CustomerMassageControllers::class, 'save'])->name('save');
 
 //order api
 Route::get('/getOrders', [OrderController::class, 'getAll'])->name('getAll');
