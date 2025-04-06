@@ -8,6 +8,7 @@ use App\Services\CustomerService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\TranslationController;
 
 
 class CustomerControllers extends Controller
@@ -30,33 +31,38 @@ class CustomerControllers extends Controller
   }
 
 
-  public function search(string $input): JsonResponse
+  public function search(string $input, Request $request): JsonResponse
   {
-    $customers = DB::table('customers')
-      ->where('customer_id', $input)
-      ->get();
-
-    $result = [];
-
-    foreach ($customers as $customer) {
-      // Get service details for this customer
-      $serviceDetails = ServiceDetails::with('service', 'ItemDetails', 'packageDetails')->where('customer_id', $customer->customer_id)
-        ->get();
-
-      // Get order details for this customer
-      $orderDetails = DB::table('orders')
-        ->where('customer_id', $customer->customer_id)
-        ->get();
-
-      // Add customer details along with their service and order details
-      $result[] = [
-        'customer' => $customer,
-        'serviceDetails' => $serviceDetails,
-        'orderDetails' => $orderDetails
-      ];
-    }
-
-    return response()->json($result, 200);
+      $country = $request->query('country', 'EN');
+      $customers = DB::table('customers')
+          ->where('customer_id', $input)
+          ->get();
+  
+      $result = [];
+  
+      foreach ($customers as $customer) {
+          // Get service details for this customer
+          $serviceDetails = ServiceDetails::with('service', 'ItemDetails', 'packageDetails')
+              ->where('customer_id', $customer->customer_id)
+              ->get();
+  
+          // Get order details for this customer
+          $orderDetails = DB::table('orders')
+              ->where('customer_id', $customer->customer_id)
+              ->get();
+  
+          // Convert customer object to array for translation
+          $customerArray = (array)$customer;
+          
+          // Add customer details along with their service and order details
+          $result[] = [
+              'customer' => TranslationController::translateJson($customerArray, $country),
+              'serviceDetails' => TranslationController::translateJson($serviceDetails->toArray(), $country),
+              'orderDetails' => TranslationController::translateJson($orderDetails->toArray(), $country)
+          ];
+      }
+  
+      return response()->json($result, 200);
   }
 
 

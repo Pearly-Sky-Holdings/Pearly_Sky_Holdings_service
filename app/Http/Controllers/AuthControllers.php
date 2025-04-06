@@ -20,11 +20,9 @@ class AuthControllers extends Controller
         ]);
 
         $user = Customer::where('email', $fields['email'])->first();
-        Log::info($user);
+       
         if (!$user) {
             $user = Employee::where('email', $fields['email'])->first();
-Log::info("1");
-            Log::info($user);
         }
 
         if (!$user || !Hash::check($fields['password'], $user->password)) {
@@ -102,7 +100,6 @@ Log::info("1");
 
     public function verifyOtpAndResetPassword(Request $request)
     {
-        Log::info("1");
         $request->validate([
             'email' => 'required|email',
             'otp' => 'required|string',
@@ -112,7 +109,6 @@ Log::info("1");
         $email = $request->email;
         $otp = $request->otp;
 
-        Log::info("4");
 
         // Check if OTP exists and is valid
         $passwordReset = PasswordReset::where('email', $email)
@@ -120,7 +116,6 @@ Log::info("1");
             ->where('expires_at', '>', Carbon::now())
             ->first();
 
-            Log::info("5");
 
 
         if (!$passwordReset) {
@@ -129,7 +124,6 @@ Log::info("1");
             ], 400);
         }
 
-        Log::info("6");
 
         // Update password based on user type
         if ($passwordReset->user_type === 'employee') {
@@ -137,7 +131,6 @@ Log::info("1");
         } else {
             $user = Customer::where('email', $email)->first();
         }
-Log::info($user);
         if (!$user) {
             return response([
                 'message' => 'User not found'

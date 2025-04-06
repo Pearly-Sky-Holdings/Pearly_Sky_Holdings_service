@@ -5,7 +5,6 @@ use App\Models\Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Services\FeedbackService;
-use Illuminate\Support\Facades\Log;
 
 class FeedbackController extends Controller
 {
