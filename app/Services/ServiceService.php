@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Customer;
 use App\Models\Service;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class ServiceService
 {
@@ -13,7 +12,6 @@ class ServiceService
     {
         $service = new Service();
         $service->fill($request->all());
-        Log::info('Service saved', $service->toArray());
         return $service->save();
     }
 

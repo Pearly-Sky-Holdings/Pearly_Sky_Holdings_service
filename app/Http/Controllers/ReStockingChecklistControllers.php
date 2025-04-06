@@ -4,8 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ReStockingChecklist;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class ReStockingChecklistControllers extends Controller
 {

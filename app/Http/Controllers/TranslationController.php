@@ -37,6 +37,7 @@ class TranslationController extends Controller
         'jp' => 'JA',
         'cn' => 'ZH',
         'ar' => 'AR',
+        'fi' => 'FI', // Finnish
     ];
     
     private static function getDeepLLanguageCode($countryCode)
@@ -102,8 +103,6 @@ class TranslationController extends Controller
 
     public static function translateJson($data, $targetLang)
     {
-        Log::info('Translating JSON data');
-        Log::info('Translating JSON data', ['targetLang' => $targetLang]);
         // Avoid translating non-strings or empty arrays
         if (empty($data)) {
             return $data;
