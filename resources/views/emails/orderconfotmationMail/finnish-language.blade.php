@@ -303,35 +303,26 @@
                 </table>
             @endif
 
-            @if(isset($data['payment']) && !empty($data['payment']['attributes']))
+            @if(isset($data['payment']) && !empty($data['payment']))
                 <div class="section-title">Maksutiedot</div>
                 <div class="payment-details">
                     <table>
                         <tr>
                             <td>Maksutapa</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['payment_method'] ?? 'Ei saatavilla') }}</td>
+                            <td>{{ ucfirst($data['payment']['payment_method'] ?? 'Ei saatavilla') }}</td>
                         </tr>
                         <tr>
-                            <td>Maksutunnus</td>
-                            <td>{{ $data['payment']['attributes']['transaction_id'] ?? 'Ei saatavilla' }}</td>
+                            <td>Kokonaishinta</td>
+                            <td>{{ number_format($data['order']['price'], 2) }} €</td>
                         </tr>
                         <tr>
                             <td>Maksun tila</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['status'] ?? 'Ei saatavilla') }}</td>
-                        </tr>
-                        <tr>
-                            <td>Maksupäivä</td>
-                            <td>{{ $data['payment']['attributes']['created_at'] ?? 'Ei saatavilla' }}</td>
+                            <td>{{ ucfirst($data['payment']['status'] ?? 'Ei saatavilla') }}</td>
                         </tr>
                     </table>
                 </div>
             @endif
 
-            @if(!empty($data['order']['attributes']['price']))
-                <div class="price-section">
-                    <p>Kokonaishinta: {{ number_format($data['order']['attributes']['price'], 2) }} €</p>
-                </div>
-            @endif
 
             <div class="note">
                 <p>Jos sinulla on kysyttävää tai haluat tehdä muutoksia tilaukseesi, ota yhteyttä asiakaspalveluumme

@@ -303,33 +303,23 @@
                 </table>
             @endif
 
-            @if(isset($data['payment']) && !empty($data['payment']['attributes']))
+            @if(isset($data['payment']) && !empty($data['payment']))
                 <div class="section-title">Betalningsinformation</div>
                 <div class="payment-details">
                     <table>
                         <tr>
                             <td>Betalningsmetod</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['payment_method'] ?? 'Saknas') }}</td>
+                            <td>{{ ucfirst($data['payment']['payment_method'] ?? 'Saknas') }}</td>
                         </tr>
                         <tr>
-                            <td>Transaktions-ID</td>
-                            <td>{{ $data['payment']['attributes']['transaction_id'] ?? 'Saknas' }}</td>
+                            <td>Totalt pris</td>
+                            <td> {{ number_format($data['order']['price'], 2) }} kr</td>
                         </tr>
                         <tr>
                             <td>Betalningsstatus</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['status'] ?? 'Saknas') }}</td>
-                        </tr>
-                        <tr>
-                            <td>Betalningsdatum</td>
-                            <td>{{ $data['payment']['attributes']['created_at'] ?? 'Saknas' }}</td>
+                            <td>{{ ucfirst($data['payment']['status'] ?? 'Saknas') }}</td>
                         </tr>
                     </table>
-                </div>
-            @endif
-
-            @if(!empty($data['order']['attributes']['price']))
-                <div class="price-section">
-                    <p>Totalt pris: {{ number_format($data['order']['attributes']['price'], 2) }} kr</p>
                 </div>
             @endif
 

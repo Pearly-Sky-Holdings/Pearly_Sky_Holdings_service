@@ -303,35 +303,26 @@
                 </table>
             @endif
 
-            @if(isset($data['payment']) && !empty($data['payment']['attributes']))
+            @if(isset($data['payment']) && !empty($data['payment']))
                 <div class="section-title">支付信息</div>
                 <div class="payment-details">
                     <table>
                         <tr>
                             <td>支付方式</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['payment_method'] ?? '无') }}</td>
+                            <td>{{ ucfirst($data['payment']['payment_method'] ?? '无') }}</td>
                         </tr>
                         <tr>
-                            <td>交易ID</td>
-                            <td>{{ $data['payment']['attributes']['transaction_id'] ?? '无' }}</td>
+                            <td>总价</td>
+                            <td>{{ number_format($data['order']['price'], 2) }}元</td>
                         </tr>
                         <tr>
                             <td>支付状态</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['status'] ?? '无') }}</td>
-                        </tr>
-                        <tr>
-                            <td>支付日期</td>
-                            <td>{{ $data['payment']['attributes']['created_at'] ?? '无' }}</td>
+                            <td>{{ ucfirst($data['payment']['status'] ?? '无') }}</td>
                         </tr>
                     </table>
                 </div>
             @endif
 
-            @if(!empty($data['order']['attributes']['price']))
-                <div class="price-section">
-                    <p>总价: {{ number_format($data['order']['attributes']['price'], 2) }}元</p>
-                </div>
-            @endif
 
             <div class="note">
                 <p>如果您有任何问题或需要修改订单，请联系我们的客户服务

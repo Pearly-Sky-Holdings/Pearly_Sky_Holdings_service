@@ -303,33 +303,23 @@
                 </table>
             @endif
 
-            @if(isset($data['payment']) && !empty($data['payment']['attributes']))
+            @if(isset($data['payment']) && !empty($data['payment']))
                 <div class="section-title">支払い情報</div>
                 <div class="payment-details">
                     <table>
                         <tr>
                             <td>支払い方法</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['payment_method'] ?? 'なし') }}</td>
+                            <td>{{ ucfirst($data['payment']['payment_method'] ?? 'なし') }}</td>
                         </tr>
                         <tr>
-                            <td>取引ID</td>
-                            <td>{{ $data['payment']['attributes']['transaction_id'] ?? 'なし' }}</td>
+                            <td>合計金額</td>
+                            <td> {{ number_format($data['order']['price'], 2) }}円</td>
                         </tr>
                         <tr>
                             <td>支払い状況</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['status'] ?? 'なし') }}</td>
-                        </tr>
-                        <tr>
-                            <td>支払い日</td>
-                            <td>{{ $data['payment']['attributes']['created_at'] ?? 'なし' }}</td>
+                            <td>{{ ucfirst($data['payment']['status'] ?? 'なし') }}</td>
                         </tr>
                     </table>
-                </div>
-            @endif
-
-            @if(!empty($data['order']['attributes']['price']))
-                <div class="price-section">
-                    <p>合計金額: {{ number_format($data['order']['attributes']['price'], 2) }}円</p>
                 </div>
             @endif
 
