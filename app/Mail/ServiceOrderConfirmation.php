@@ -22,7 +22,7 @@ class ServiceOrderConfirmation extends Mailable
     public function build()
     {        
         // Check the language and return the appropriate view
-        if ($this->data['language'] == 'en') {
+        if ($this->data['language'] == 'en' || $this->data['language'] == 'us') {
             return $this->from(self::SYSTEM_EMAIL, 'PearlySky PLC')
             ->subject('Service Order Confirmation')
             ->view('emails.orderconfotmationMail.service-order-confirmation')
