@@ -24,11 +24,11 @@ class CustomerMassageControllers extends Controller
    
         // Send email
         \Mail::send('emails.customer_massage', ['data' => $data], function ($message) use ($data) {
-            $message->to('nipuna315np@gmail.com', 'PearlySky PLC')
+            $message->to('Helpdesk@pearlyskyplc.com', 'PearlySky PLC')
                      ->from($data['email'], 'PearlySky PLC')
                     ->subject('Customer massage - ' . $data['id']);
         });
 
-        return redirect()->back()->with('success',201);
+        return response()->json($data, 201);
     }
 }

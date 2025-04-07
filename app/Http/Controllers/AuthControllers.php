@@ -83,7 +83,7 @@ class AuthControllers extends Controller
         try {
             Mail::send('emails.reset_password', ['otp' => $otp], function ($message) use ($email) {
                 $message
-                ->from('paniyapranks@gmail.com', 'PearlySky PLC')
+                ->from('Systempearlyskycleaningplc@gmail.com', 'PearlySky PLC')
                 ->to($email)->subject('Reset Password OTP');
             });
 
@@ -179,5 +179,46 @@ class AuthControllers extends Controller
         return response([
             'message' => 'OTP verified successfully'
         ], 200);
+    }
+
+
+    public function forgotPasswordWithotUser(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $email = $request->email;
+        $userType = 'customer';
+
+        // Generate OTP
+        $otp = sprintf("%06d", mt_rand(100000, 999999));
+
+          // Save new OTP
+          PasswordReset::create([
+            'email' => $email,
+            'otp' => $otp,
+            'user_type' => $userType,
+            'created_at' => Carbon::now(),
+            'expires_at' => Carbon::now()->addMinutes(15)
+        ]);
+
+        // Send email with OTP
+        try {
+            Mail::send('emails.reset_password', ['otp' => $otp], function ($message) use ($email) {
+                $message
+                ->from('Systempearlyskycleaningplc@gmail.com', 'PearlySky PLC')
+                ->to($email)->subject('Reset Password OTP');
+            });
+
+            return response([
+                'message' => 'OTP has been sent to your email'
+            ], 200);
+        } catch (\Exception $e) {
+            return response([
+                'message' => 'Error sending email',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
