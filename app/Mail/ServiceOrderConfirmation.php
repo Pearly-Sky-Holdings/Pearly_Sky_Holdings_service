@@ -75,6 +75,11 @@ class ServiceOrderConfirmation extends Mailable
             ->view('emails.orderconfotmationMail.finnish-language')
             ->with(['data' => $this->data]);
         }
+            return $this->from(self::SYSTEM_EMAIL, 'PearlySky PLC')
+            ->subject('Service Order Confirmation')
+            ->view('emails.orderconfotmationMail.service-order-confirmation')
+            ->with(['data' => $this->data]);
+        
        
     }
 }
