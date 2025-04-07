@@ -297,7 +297,7 @@
                         <tr>
                             <td>{{ $package['package']['name'] ?? '无' }}</td>
                             <td>{{ $package['qty'] ?? '0' }}</td>
-                            <td>{{ number_format($package['price'], 2) }}元</td>
+                            <td>{{ $package['price'] ?? '0' }}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -313,7 +313,7 @@
                         </tr>
                         <tr>
                             <td>总价</td>
-                            <td>{{ number_format($data['order']['price'], 2) }}元</td>
+                            <td>{{ ucfirst($data['order']['price'] ?? 'N/A') }}</td>
                         </tr>
                         <tr>
                             <td>支付状态</td>

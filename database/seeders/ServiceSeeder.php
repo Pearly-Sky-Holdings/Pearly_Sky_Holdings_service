@@ -20,7 +20,7 @@ class ServiceSeeder extends Seeder
                 "status" => "active"
             ],
             [
-                "name" => "One Time Cleaning",
+                "name" => "One Time Basic Cleaning",
                 "price" => "27.00€",
                 "status" => "active"
             ],

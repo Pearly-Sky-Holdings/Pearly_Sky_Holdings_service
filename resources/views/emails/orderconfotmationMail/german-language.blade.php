@@ -297,7 +297,7 @@
                         <tr>
                             <td>{{ $package['package']['name'] ?? 'k.A.' }}</td>
                             <td>{{ $package['qty'] ?? '0' }}</td>
-                            <td>{{ number_format($package['price'], 2) }} €</td>
+                            <td>{{ $package['price'] ?? '0' }}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -313,7 +313,7 @@
                         </tr>
                         <tr>
                             <td>Gesamtpreis</td>
-                            <td> {{ number_format($data['order']['price'], 2) }} €</td>
+                            <td>{{ ucfirst($data['order']['price'] ?? 'N/A') }}</td>
                         </tr>
                         <tr>
                             <td>Zahlungsstatus</td>
