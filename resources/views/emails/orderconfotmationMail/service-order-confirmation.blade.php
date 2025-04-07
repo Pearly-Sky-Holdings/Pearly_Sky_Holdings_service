@@ -297,7 +297,7 @@
                         <tr>
                             <td>{{ $package['package']['name'] ?? 'N/A' }}</td>
                             <td>{{ $package['qty'] ?? '0' }}</td>
-                            <td>Rs. {{ number_format($package['price'], 2) }}</td>
+                            <td>Rs. {{ is_numeric($package['price'] ?? 0) ? number_format((float)$package['price'], 2) : '0.00' }}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -313,7 +313,7 @@
                         </tr>
                         <tr>
                             <td>Total Price</td>
-                            <td>Rs. {{ number_format($data['order']['price'], 2) }}</td>
+                            <td>Rs. {{ is_numeric($data['order']['price'] ?? 0) ? number_format((float)$data['order']['price'], 2) : '0.00' }}</td>
                         </tr>
                         <tr>
                             <td>Payment Status</td>
