@@ -300,7 +300,7 @@
                         <tr>
                             <td>{{ $package['package']['name'] ?? 'غير متوفر' }}</td>
                             <td>{{ $package['qty'] ?? '0' }}</td>
-                            <td>{{ number_format($package['price'], 2) }} ر.س</td>
+                            <td>{{ $package['price'] ?? '0' }}</td>
                         </tr>
                     @endforeach
                 </table>
@@ -320,7 +320,7 @@
                         </tr>
                         <tr>
                             <td>السعر الإجمالي: </td>
-                            <td> {{ number_format($data['order']['price'], 2) }} ر.س</td>
+                            <td>{{ ucfirst($data['order']['price'] ?? 'N/A') }}</td>
                         </tr>
                     </table>
                 </div>
