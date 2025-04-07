@@ -306,33 +306,23 @@
                 </table>
             @endif
 
-            @if(isset($data['payment']) && !empty($data['payment']['attributes']))
+            @if(isset($data['payment']) && !empty($data['payment']))
                 <div class="section-title">معلومات الدفع</div>
                 <div class="payment-details">
                     <table>
                         <tr>
                             <td>طريقة الدفع</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['payment_method'] ?? 'غير متوفر') }}</td>
-                        </tr>
-                        <tr>
-                            <td>رقم المعاملة</td>
-                            <td>{{ $data['payment']['attributes']['transaction_id'] ?? 'غير متوفر' }}</td>
+                            <td>{{ ucfirst($data['payment']['payment_method'] ?? 'غير متوفر') }}</td>
                         </tr>
                         <tr>
                             <td>حالة الدفع</td>
-                            <td>{{ ucfirst($data['payment']['attributes']['status'] ?? 'غير متوفر') }}</td>
+                            <td>{{ ucfirst($data['payment']['status'] ?? 'غير متوفر') }}</td>
                         </tr>
                         <tr>
-                            <td>تاريخ الدفع</td>
-                            <td>{{ $data['payment']['attributes']['created_at'] ?? 'غير متوفر' }}</td>
+                            <td>السعر الإجمالي: </td>
+                            <td> {{ number_format($data['order']['price'], 2) }} ر.س</td>
                         </tr>
                     </table>
-                </div>
-            @endif
-
-            @if(!empty($data['order']['attributes']['price']))
-                <div class="price-section">
-                    <p>السعر الإجمالي: {{ number_format($data['order']['attributes']['price'], 2) }} ر.س</p>
                 </div>
             @endif
 
