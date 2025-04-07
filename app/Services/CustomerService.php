@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class CustomerService
 {
@@ -11,6 +12,7 @@ class CustomerService
     {
         $customer = new Customer();
         $customer->fill($request->all());
+        $customer->password = Hash::make($customer->password);
         return $customer->save();
     }
 
