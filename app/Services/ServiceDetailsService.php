@@ -11,6 +11,7 @@ use App\Models\ReStockingChecklistDetails;
 use App\Models\Service;
 use App\Models\ServiceDetails;
 use App\Models\Payment;
+use Egulias\EmailValidator\Result\ValidEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -98,32 +99,44 @@ class ServiceDetailsService
                 'payment_method' => 'required|string',
             ]);
 
-            $result = $this->createPendingTransaction($validatedData);
-            $result['country'] = $this->country;
+            $existingCustomer = Customer::where('email', $validatedData['customer']['email'])->first();
+            
 
-            if ($validatedData['payment_method'] == 'paypal') {
-                $paymentResponse = $this->initiatePayPalPayment($result);
-                session(['pending_order_id' => $result['order']->order_id]);
+            if($existingCustomer){
+                $validatedData['customer_id'] = $existingCustomer->customer_id;
+                $result = $this->createPendingTransaction($validatedData);
+                $result['country'] = $this->country;
 
+                if ($validatedData['payment_method'] == 'paypal') {
+                    $paymentResponse = $this->initiatePayPalPayment($result);
+                    session(['pending_order_id' => $result['order']->order_id]);
+
+                    return response()->json([
+                        'status' => 'pending_payment',
+                        'message' => 'Please complete payment with PayPal',
+                        'payment_url' => $paymentResponse['approval_url'],
+                        'order_id' => $result['order']->order_id
+                    ]);
+                } else if ($validatedData['payment_method'] == 'stripe' || $validatedData['payment_method'] == 'card') {
+                    $paymentResponse = $this->initiateStripePayment($result);
+                    session(['pending_order_id' => $result['order']->order_id]);
+
+                    return response()->json([
+                        'status' => 'pending_payment',
+                        'message' => 'Please complete payment with your card',
+                        'payment_url' => $paymentResponse['checkout_url'],
+                        'session_id' => $paymentResponse['session_id'],
+                        'order_id' => $result['order']->order_id
+                    ]);
+                } else {
+                    return $this->completeDirectPayment($result, $validatedData['payment_method']);
+                }
+            }else{
+                DB::rollBack();
                 return response()->json([
-                    'status' => 'pending_payment',
-                    'message' => 'Please complete payment with PayPal',
-                    'payment_url' => $paymentResponse['approval_url'],
-                    'order_id' => $result['order']->order_id
-                ]);
-            } else if ($validatedData['payment_method'] == 'stripe' || $validatedData['payment_method'] == 'card') {
-                $paymentResponse = $this->initiateStripePayment($result);
-                session(['pending_order_id' => $result['order']->order_id]);
-
-                return response()->json([
-                    'status' => 'pending_payment',
-                    'message' => 'Please complete payment with your card',
-                    'payment_url' => $paymentResponse['checkout_url'],
-                    'session_id' => $paymentResponse['session_id'],
-                    'order_id' => $result['order']->order_id
-                ]);
-            } else {
-                return $this->completeDirectPayment($result, $validatedData['payment_method']);
+                    'status' => 'error',
+                    'message' => 'Invalid email address'
+                ], 400);
             }
 
         } catch (Exception $e) {
@@ -142,7 +155,7 @@ class ServiceDetailsService
         try {
             if (isset($validatedData['customer'])) {
                 $validatedData['customer'] = TranslationController::translateJson(
-                    $validatedData['customer'], 
+                    $validatedData['customer'],
                     $this->country,
                     true
                 );
@@ -528,12 +541,12 @@ class ServiceDetailsService
                 'systempearlyskycleaningplc@gmail.com'
             ];
             
-            foreach ($companyEmails as $companyEmail) {
-                \Mail::to($companyEmail)->send(new \App\Mail\ServiceOrderConfirmation(
-                    $data,
-                    storage_path('app/public/' . $order->qr_code)
-                ));
-            }
+            // foreach ($companyEmails as $companyEmail) {
+            //     \Mail::to($companyEmail)->send(new \App\Mail\ServiceOrderConfirmation(
+            //         $data,
+            //         storage_path('app/public/' . $order->qr_code)
+            //     ));
+            // }
 
             return true;
         } catch (Exception $e) {
