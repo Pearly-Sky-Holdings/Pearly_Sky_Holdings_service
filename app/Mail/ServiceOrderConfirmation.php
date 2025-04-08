@@ -65,7 +65,7 @@ class ServiceOrderConfirmation extends Mailable
             ->subject('Service Order Confirmation')
             ->view('emails.orderconfotmationMail.swedish-language')
             ->with(['data' => $this->data]);
-        }elseif($this->data['language'] == 'ar'){
+        }elseif($this->data['language'] == 'ar' || $this->data['language'] == 'sa'){
             return $this->from(self::SYSTEM_EMAIL, 'PearlySky PLC')
             ->subject('Service Order Confirmation')
             ->view('emails.orderconfotmationMail.arabic-language')
