@@ -166,6 +166,7 @@ class ServiceDetailsService
                 $customer = Customer::create($validatedData['customer']);
                 $customerId = $customer->customer_id;
             } else {
+                $validatedData['customer']['password'] = Hash::make($validatedData['customer']['password']);
                 $customer = Customer::find($validatedData['customer_id']);
                 $customer->update($validatedData['customer']);
                 $customerId = $validatedData['customer_id'];
