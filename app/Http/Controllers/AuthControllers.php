@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
@@ -192,9 +193,8 @@ class AuthControllers extends Controller
         $email = $request->email;
         $userType = 'customer';
 
-        $request = DB::table('customers')
-            ->Where('email', 'LIKE', '%' . $request->email . '%')
-            ->get();
+        $request = Customer::where('email', $email)->first();
+
 
         if (!$request) {
             // Generate OTP
@@ -230,7 +230,7 @@ class AuthControllers extends Controller
             return response([
                 'message' => 'Email Is used',
                 'error' => 'Email Is used',
-            ], 500);
+            ], 501);
         }
 
 
