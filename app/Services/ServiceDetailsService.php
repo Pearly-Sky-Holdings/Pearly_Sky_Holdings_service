@@ -311,13 +311,13 @@ class ServiceDetailsService
             $qrCodePath = $this->generateQrCode($result['order']->order_id);
             $result['order']->update(['qr_code' => $qrCodePath]);
 
-            DB::commit();
-
             $this->sendTranslatedEmail(
                 $result['customer']->email, 
                 $result['customerId'],
                 $result['country']
             );
+
+            DB::commit();
 
             return response()->json([
                 'status' => 'success',
