@@ -36,7 +36,7 @@ class TranslationController extends Controller
         'jp' => 'JA',
         'cn' => 'ZH',
         'ar' => 'AR',
-        'ar' => 'sa',
+        'sa' => 'ar',
         'fi' => 'FI', // Finnish
     ];
     
