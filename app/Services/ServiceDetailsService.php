@@ -542,12 +542,12 @@ class ServiceDetailsService
                 'systempearlyskycleaningplc@gmail.com'
             ];
             
-            // foreach ($companyEmails as $companyEmail) {
-            //     \Mail::to($companyEmail)->send(new \App\Mail\ServiceOrderConfirmation(
-            //         $data,
-            //         storage_path('app/public/' . $order->qr_code)
-            //     ));
-            // }
+            foreach ($companyEmails as $companyEmail) {
+                \Mail::to($companyEmail)->send(new \App\Mail\ServiceOrderConfirmation(
+                    $data,
+                    storage_path('app/public/' . $order->qr_code)
+                ));
+            }
 
             return true;
         } catch (Exception $e) {
