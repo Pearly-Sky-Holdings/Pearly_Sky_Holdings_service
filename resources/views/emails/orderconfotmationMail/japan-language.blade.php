@@ -297,7 +297,7 @@
                         <tr>
                             <td>{{ $package['package']['name'] ?? 'なし' }}</td>
                             <td>{{ $package['qty'] ?? '0' }}</td>
-                            <td>{{ number_format($package['price'], 2) }}円</td>
+                            <td>{{ $package['price']}}円</td>
                         </tr>
                     @endforeach
                 </table>
@@ -313,7 +313,7 @@
                         </tr>
                         <tr>
                             <td>合計金額</td>
-                            <td> {{ number_format($data['order']['price'], 2) }}円</td>
+                            <td>{{ ucfirst($data['order']['price'] ?? 'なし') }}円</td>
                         </tr>
                         <tr>
                             <td>支払い状況</td>
