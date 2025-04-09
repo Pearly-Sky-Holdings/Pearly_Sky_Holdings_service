@@ -3,12 +3,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 use App\Models\Customer;
 use App\Models\Employee;
 use App\Models\PasswordReset;
 use Carbon\Carbon;
-use Log;
+
 
 class AuthControllers extends Controller
 {
@@ -20,7 +20,7 @@ class AuthControllers extends Controller
         ]);
 
         $user = Customer::where('email', $fields['email'])->first();
-       
+
         if (!$user) {
             $user = Employee::where('email', $fields['email'])->first();
         }
@@ -83,8 +83,8 @@ class AuthControllers extends Controller
         try {
             Mail::send('emails.reset_password', ['otp' => $otp], function ($message) use ($email) {
                 $message
-                ->from('Systempearlyskycleaningplc@gmail.com', 'PearlySky PLC')
-                ->to($email)->subject('Reset Password OTP');
+                    ->from('Systempearlyskycleaningplc@gmail.com', 'PearlySky PLC')
+                    ->to($email)->subject('Reset Password OTP');
             });
 
             return response([
@@ -140,14 +140,14 @@ class AuthControllers extends Controller
         try {
             $user->password = Hash::make($request->password);
             $result = $user->save();
-            
+
             if (!$result) {
                 return response(['message' => 'Failed to update password'], 500);
             }
-            
+
             // Delete the used OTP
             $passwordReset->delete();
-            
+
             return response(['message' => 'Password has been reset successfully'], 200);
         } catch (\Exception $e) {
             return response(['message' => 'Error: ' . $e->getMessage()], 500);
@@ -188,37 +188,50 @@ class AuthControllers extends Controller
             'email' => 'required|email'
         ]);
 
+
         $email = $request->email;
         $userType = 'customer';
 
-        // Generate OTP
-        $otp = sprintf("%06d", mt_rand(100000, 999999));
+        $request = DB::table('customers')
+            ->Where('email', 'LIKE', '%' . $request->email . '%')
+            ->get();
 
-          // Save new OTP
-          PasswordReset::create([
-            'email' => $email,
-            'otp' => $otp,
-            'user_type' => $userType,
-            'created_at' => Carbon::now(),
-            'expires_at' => Carbon::now()->addMinutes(15)
-        ]);
+        if (!$request) {
+            // Generate OTP
+            $otp = sprintf("%06d", mt_rand(100000, 999999));
 
-        // Send email with OTP
-        try {
-            Mail::send('emails.reset_password', ['otp' => $otp], function ($message) use ($email) {
-                $message
-                ->from('Systempearlyskycleaningplc@gmail.com', 'PearlySky PLC')
-                ->to($email)->subject('Reset Password OTP');
-            });
+            // Save new OTP
+            PasswordReset::create([
+                'email' => $email,
+                'otp' => $otp,
+                'user_type' => $userType,
+                'created_at' => Carbon::now(),
+                'expires_at' => Carbon::now()->addMinutes(15)
+            ]);
 
+            // Send email with OTP
+            try {
+                Mail::send('emails.reset_password', ['otp' => $otp], function ($message) use ($email) {
+                    $message
+                        ->from('Systempearlyskycleaningplc@gmail.com', 'PearlySky PLC')
+                        ->to($email)->subject('Reset Password OTP');
+                });
+
+                return response([
+                    'message' => 'OTP has been sent to your email'
+                ], 200);
+            } catch (\Exception $e) {
+                return response([
+                    'message' => 'Error sending email',
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        } else {
             return response([
-                'message' => 'OTP has been sent to your email'
-            ], 200);
-        } catch (\Exception $e) {
-            return response([
-                'message' => 'Error sending email',
-                'error' => $e->getMessage()
+                'message' => 'Email Is used',
             ], 500);
         }
+
+
     }
 }
