@@ -229,6 +229,7 @@ class AuthControllers extends Controller
         } else {
             return response([
                 'message' => 'Email Is used',
+                'error' => 'Email Is used',
             ], 500);
         }
 
