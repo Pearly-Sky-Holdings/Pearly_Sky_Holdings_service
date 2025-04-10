@@ -150,9 +150,20 @@ class ServiceDetailsService
             }
 
             if (!isset($validatedData['customer_id'])) {
-                $validatedData['customer']['password'] = Hash::make($validatedData['customer']['password']);
-                $customer = Customer::create($validatedData['customer']);
-                $customerId = $customer->customer_id;
+                $existingCustomer = Customer::where('email', $validatedData['customer']['email'])->first();
+
+                if ($existingCustomer) {
+                    $validatedData['customer']['password'] = Hash::make($existingCustomer->password);
+                    $validatedData['customer']['customer_id'] = $existingCustomer->customer_id;
+                    $existingCustomer->update($validatedData['customer']);
+                    $customer = $existingCustomer;
+                    $customerId = $existingCustomer->customer_id;
+                } else {
+                    $validatedData['customer']['password'] = Hash::make($validatedData['customer']['password']);
+                    $customer = Customer::create($validatedData['customer']);
+                    $customerId = $customer->customer_id;
+                }
+
             } else {
                 $customer = Customer::find($validatedData['customer_id']);
                 $validatedData['customer']['password'] = Hash::make($customer->password);
