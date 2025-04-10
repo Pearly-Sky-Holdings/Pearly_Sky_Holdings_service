@@ -99,11 +99,7 @@ class ServiceDetailsService
                 'payment_method' => 'required|string',
             ]);
 
-            $existingCustomer = Customer::where('email', $validatedData['customer']['email'])->first();
-            
-
-            if($existingCustomer){
-                $validatedData['customer_id'] = $existingCustomer->customer_id;
+          
                 $result = $this->createPendingTransaction($validatedData);
                 $result['country'] = $this->country;
 
@@ -131,14 +127,6 @@ class ServiceDetailsService
                 } else {
                     return $this->completeDirectPayment($result, $validatedData['payment_method']);
                 }
-            }else{
-                DB::rollBack();
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Invalid email address'
-                ], 400);
-            }
-
         } catch (Exception $e) {
             DB::rollBack();
             Log::error('Service details save failed: ' . $e->getMessage());
