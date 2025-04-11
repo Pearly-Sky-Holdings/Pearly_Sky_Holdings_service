@@ -153,7 +153,7 @@ class ServiceDetailsService
                 $existingCustomer = Customer::where('email', $validatedData['customer']['email'])->first();
 
                 if ($existingCustomer) {
-                    $validatedData['customer']['password'] = Hash::make($existingCustomer->password);
+                    $validatedData['customer']['password'] = $existingCustomer->password;
                     $validatedData['customer']['customer_id'] = $existingCustomer->customer_id;
                     $existingCustomer->update($validatedData['customer']);
                     $customer = $existingCustomer;
