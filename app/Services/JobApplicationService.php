@@ -26,7 +26,7 @@ class JobApplicationService
     
             // Send email with PDF attachment
             \Mail::send('emails.job_application', ['data' => $translatedData], function ($message) use ($pdf, $translatedData) {
-                $message->to('nipuna315np@gmail.com', 'PearlySky PLC')
+                $message->to('recruiting@pearlyskyplc.com', 'PearlySky PLC')
                         ->from($translatedData['email'] ?? 'no-reply@pearlysky.com', $translatedData['first_name'] . ' ' . $translatedData['last_name'])
                         ->subject('New Job Application - ' . $translatedData['id'])
                         ->attach($pdf->getRealPath(), [
