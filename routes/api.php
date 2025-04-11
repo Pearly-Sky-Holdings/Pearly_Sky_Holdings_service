@@ -18,7 +18,7 @@ Route::post('/login', [AuthControllers::class, 'login'])->name('login');
 // New password reset routes
 Route::post('/forgot_password', [AuthControllers::class, 'forgotPassword']);
 Route::post('/forgot_password_With_out_user', [AuthControllers::class, 'forgotPasswordWithotUser']);
-Route::post('/verify_otp', [AuthControllers::class, 'verifyOtpAndResetPassword']);
+Route::post('/verify_otp', [AuthControllers::class, 'verifyOtp']);
 Route::post('/reset_password', [AuthControllers::class, 'verifyOtpAndResetPassword']);
 
 //packages
