@@ -35,7 +35,7 @@ class ServiceSeeder extends Seeder
                 "status" => "active"
             ],
             [
-                "name" => "Move In/Out Cleaning",
+                "name" => "Move In & Out Cleaning",
                 "price" => "32.00€",
                 "status" => "active"
             ],
@@ -45,17 +45,17 @@ class ServiceSeeder extends Seeder
                 "status" => "active"
             ],
             [
-                "name" => "Airbnb And Short Term Rental Cleaning",
+                "name" => "Airbnb & Short Term Rental Cleaning",
                 "price" => "29.00€",
                 "status" => "active"
             ],
             [
-                "name" => "Child Care Services",
+                "name" => "Child Care Service",
                 "price" => "29.00€",
                 "status" => "active"
             ],
             [
-                "name" => "Elder’s Care Service",
+                "name" => "Elder Care Service",
                 "price" => "29.00€",
                 "status" => "active"
             ],
@@ -65,7 +65,7 @@ class ServiceSeeder extends Seeder
                 "status" => "active"
             ],
             [
-                "name" => "Commercial and Office Cleaning",
+                "name" => "Commercial & Office Cleaning",
                 "price" => "0$",
                 "status" => "active"
             ],
@@ -75,7 +75,7 @@ class ServiceSeeder extends Seeder
                 "status" => "active"
             ],
             [
-                "name" => "Move In and Out Transport Cleaning",
+                "name" => "Move In & Out Transport Cleaning",
                 "price" => "0$",
                 "status" => "active"
             ],
@@ -90,7 +90,7 @@ class ServiceSeeder extends Seeder
                 "status" => "active"
             ],
             [
-                "name" => "Special Event Cleaning",
+                "name" => "Event Cleaning",
                 "price" => "0$",
                 "status" => "active"
             ],

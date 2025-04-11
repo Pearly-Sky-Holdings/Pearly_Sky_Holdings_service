@@ -57,34 +57,49 @@
             <table>
                 <tr>
                     <td class="label">Application ID:</td>
-                    <td>{{ $data->id }}</td>
+                    <td>{{ $data['id'] }}</td>
                 </tr>
                 <tr>
                     <td class="label">Applicant:</td>
-                    <td>{{ $data->first_name }} {{ $data->last_name }}</td>
+                    <td>{{ $data['first_name'] }} {{ $data['last_name'] }}</td>
                 </tr>
-                @if(isset($data->email))
+                @if(isset($data['email']))
                 <tr>
                     <td class="label">Email:</td>
-                    <td>{{ $data->email }}</td>
+                    <td>{{ $data['email'] }}</td>
                 </tr>
                 @endif
-                @if(isset($data->phone))
+                @if(isset($data['contact']))
                 <tr>
                     <td class="label">Phone:</td>
-                    <td>{{ $data->phone }}</td>
+                    <td>{{ $data['contact'] }}</td>
                 </tr>
                 @endif
-                @if(isset($data->position))
+                @if(isset($data['position']))
                 <tr>
                     <td class="label">Position Applied:</td>
-                    <td>{{ $data->position }}</td>
+                    <td>{{ $data['position'] }}</td>
                 </tr>
                 @endif
-                @if(isset($data->applied_date))
                 <tr>
                     <td class="label">Date Applied:</td>
-                    <td>{{ date('F j, Y', strtotime($data->created_at)) }}</td>
+                    <td>{{ date('F j, Y', strtotime($data['created_at'])) }}</td>
+                </tr>
+                @if(isset($data['street_address']))
+                <tr>
+                    <td class="label">Address:</td>
+                    <td>
+                        {{ $data['street_address'] }}<br>
+                        @if(isset($data['city'])) {{ $data['city'] }}, @endif
+                        @if(isset($data['postal_code'])) {{ $data['postal_code'] }}<br> @endif
+                        @if(isset($data['country'])) {{ $data['country'] }} @endif
+                    </td>
+                </tr>
+                @endif
+                @if(isset($data['company']))
+                <tr>
+                    <td class="label">Current Company:</td>
+                    <td>{{ $data['company'] }}</td>
                 </tr>
                 @endif
             </table>
